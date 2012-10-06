@@ -34,15 +34,22 @@ module.exports = FileStreamRotator = {};
 
 FileStreamRotator.getStream = function(options){
 
+    function padNumber(number){
+        if( number.toString().length < 2){
+            return  "0" + number;
+        }
+        return number;
+    }
+
     function getDate(format){
         var date = new Date();
         switch(format){
             case 'test':
-                return ( date.getFullYear() + "" + (date.getMonth()+1) + "" + (date.getDate() < 10?"0" + date.getDate():date.getDate()) +
-                    "" + date.getHours() + "" + date.getMinutes() )
+                return ( date.getFullYear() + "" + padNumber((date.getMonth()+1)) + "" + padNumber(date.getDate()) +
+                    "" + padNumber(date.getHours()) + "" + padNumber(date.getMinutes()) )
                     ;
             default:
-                return date.getFullYear() + "" + (date.getMonth()+1) + "" + (date.getDate() < 10?"0" + date.getDate():date.getDate());
+                return date.getFullYear() + "" + padNumber((date.getMonth()+1)) + "" + padNumber(date.getDate());
 
         }
     }
@@ -68,6 +75,7 @@ FileStreamRotator.getStream = function(options){
                     var newLogfile = filename + (curDate?"." + newDate:"");
                     console.error("Changing logs from " + logfile+ " to " + newLogfile);
                     curDate = newDate;
+                    logfile = newLogfile;
                     rotateStream.destroy();
                     rotateStream = fs.createWriteStream(newLogfile, {flags: 'a'});
                 }
