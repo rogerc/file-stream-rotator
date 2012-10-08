@@ -1,0 +1,22 @@
+{
+  "name": "file-stream-rotator",
+  "version": "0.0.1",
+  "description": "Automated stream rotation",
+  "main": "FileStreamRotator.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/holidayextras/file-stream-rotator.git"
+  },
+  "keywords": [
+    "stream",
+    "express",
+    "connect",
+    "rotate",
+    "file"
+  ],
+  "author": "Dan Jenkins",
+  "license": "MIT"
+}
