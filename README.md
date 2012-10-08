@@ -30,4 +30,4 @@ The npm module for this library is maintained by:
 
 ## License
 
-asterisk-ami is licensed under the MIT license.
+file-stream-rotator is licensed under the MIT license.
