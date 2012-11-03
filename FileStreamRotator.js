@@ -16,13 +16,14 @@ var fs = require('fs');
  *
  * Options:
  *
- *   - `filename`  Filename including full path used by the stream
+ *   - `filename`   Filename including full path used by the stream
  *   - `frequency`  How often to rotate. At present only 'daily' and 'test' are available. 'test' rotates every minute.
  *                  If frequency is set to none of the above, a YYYYMMDD string will be added to the end of the filename.
+ *   - `verbose`    If set, it will log to STDOUT when it rotates files and name of log file. Default is TRUE.
  *
  * To use with Express / Connect, use as below.
  *
- * var rotatingLogStream = require('FileStreamRotator').getStream({filename:"/tmp/test.log", frequency:"daily"})
+ * var rotatingLogStream = require('FileStreamRotator').getStream({filename:"/tmp/test.log", frequency:"daily", verbose: false})
  * app.use(express.logger({stream: rotatingLogStream, format: "default"}));
  *
  * @param {Object} options
@@ -62,18 +63,25 @@ FileStreamRotator.getStream = function(options){
     var curDate = (options.frequency?getDate(options.frequency):"");
     var filename = options.filename;
     var logfile = filename + (curDate?"." + curDate:"");
-    console.error("Logging to " + logfile);
+    var verbose = (options.verbose !== undefined?options.verbose:true);
+    if(verbose){
+        console.log("Logging to " + logfile);
+    }
     var rotateStream = fs.createWriteStream(logfile, {flags: 'a'});
     switch(options.frequency){
         case 'test':
         case 'daily':
-            console.error("Rotating file " + options.frequency);
+            if(verbose){
+                console.log("Rotating file " + options.frequency);
+            }
             var stream = {end: rotateStream.end};
             stream.write = (function(str,encoding){
                 var newDate = getDate(options.frequency);
                 if(newDate != curDate){
                     var newLogfile = filename + (curDate?"." + newDate:"");
-                    console.error("Changing logs from " + logfile+ " to " + newLogfile);
+                    if(verbose){
+                        console.log("Changing logs from " + logfile+ " to " + newLogfile);
+                    }
                     curDate = newDate;
                     logfile = newLogfile;
                     rotateStream.destroy();
@@ -84,7 +92,9 @@ FileStreamRotator.getStream = function(options){
             }).bind(this);
             return stream;
         default:
-            console.error("File won't be rotated");
+            if(verbose){
+                console.log("File won't be rotated");
+            }
             return rotateStream;
     }
 }
