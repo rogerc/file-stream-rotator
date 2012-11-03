@@ -15,7 +15,7 @@ npm install file-stream-rotator
 
 ## Usage
 
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"daily"})
+    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"daily", verbose: false})
     .....
     // Use new stream in express
     app.use(express.logger({stream: rotatingLogStream, format: "default"}));
@@ -25,7 +25,7 @@ npm install file-stream-rotator
 The npm module for this library is maintained by:
 
 * [Dan Jenkins](http://github.com/danjenkins)
-* [Roger Castells](http://github.com/hxroger)
+* [Roger Castells](http://github.com/rogerc)
 * [Viktor Trako](http://github.com/viktort)
 
 ## License
