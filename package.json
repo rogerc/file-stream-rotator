@@ -18,5 +18,8 @@
     "file"
   ],
   "author": "Dan Jenkins",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "moment": "2.3.1"
+  }
 }
