@@ -13,10 +13,14 @@
     "keywords": [
         "stream",
         "express",
+        "restify",
         "connect",
         "rotate",
         "file",
-        "5 minute log rotate"
+        "minute",
+        "hourly",
+        "daily",
+        "logrotate"
     ],
     "author": "Roger Castells",
     "license": "MIT",
