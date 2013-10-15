@@ -19,6 +19,12 @@ npm install file-stream-rotator
     .....
     // Use new stream in express
     app.use(express.logger({stream: rotatingLogStream, format: "default"}));
+    .....
+    frequency options include:
+    * daily
+    * rotate on given minutes using the 'm' option i.e. 5m or 30m
+    * rotate on the hour or any specified number of hours
+    * test - creates a log file with a date suffix
 
 ## NPM Maintainers
 

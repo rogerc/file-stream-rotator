@@ -1,5 +1,6 @@
 var fsr = require('./FileStreamRotator');
 var assert = require('assert');
+var fs = require('fs');
 
 var tests = {
     testFrequency: function () {
@@ -105,19 +106,38 @@ var tests = {
         console.log(fsr.getDate(opt6));
     },
     testGetStream: function() {
-        var options = { filename: __dirname + '/log/program.log', frequency: '1m', verbose: true }
 
-        var stream = fsr.getStream(options);
-        process.__defineGetter__('stdout', function() { return stream;});
-        process.__defineGetter__('stderr', function() { return stream;});
+        var logdir = __dirname + '/log/';
 
-        setTimeout(function(){
-            stream.write('Foo bar');
-        }, 3000)
+        var test = function() {
+            var options = { filename: logdir + 'program.log', frequency: '1m', verbose: true }
 
-        setTimeout(function(){
-            stream.write('Foo bar');
-        }, 60000);
+            var stream = fsr.getStream(options);
+            process.__defineGetter__('stdout', function() { return stream;});
+            process.__defineGetter__('stderr', function() { return stream;});
+
+            setTimeout(function(){
+                stream.write('Foo bar');
+            }, 3000)
+
+            setTimeout(function(){
+                stream.write('Foo bar');
+            }, 60000);
+        }
+
+        fs.exists(logdir, function(exists) {
+            if(!exists) {
+                console.log('Creating the log directory as one doesnt exist');
+                fs.mkdir(logdir, function(err) {
+                    console.log('err =', err);
+                    if(err) {
+                        throw err;
+                    }
+                    test();
+                });
+            }
+            test();
+        });
     }
 }
 
