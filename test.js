@@ -105,7 +105,7 @@ var tests = {
         console.log(fsr.getDate(opt6));
     },
     testGetStream: function() {
-        var options = { filename: __dirname + '/log/program.log', frequency: '5m', verbose: false }
+        var options = { filename: __dirname + '/log/program.log', frequency: '1m', verbose: true }
 
         var stream = fsr.getStream(options);
         process.__defineGetter__('stdout', function() {
@@ -115,7 +115,13 @@ var tests = {
             return stream;
         });
 
-        console.log('Foo bar');
+        setTimeout(function(){
+            stream.write('Foo bar');
+        }, 3000)
+
+        setTimeout(function(){
+            stream.write('Foo bar');
+        }, 60000);
     }
 }
 

@@ -114,6 +114,7 @@ FileStreamRotator.getDate = function(format) {
 FileStreamRotator.getStream = function(options){
     var frequencyMetaData = null;
     var curDate = null;
+    var self = this;
 
     if(!options.filename){
         console.error("No filename supplied. Defaulting to STDOUT");
@@ -121,11 +122,11 @@ FileStreamRotator.getStream = function(options){
     }
 
     if(options.frequency) {
-        frequencyMetaData = this.getFrequency(options.frequency);
+        frequencyMetaData = self.getFrequency(options.frequency);
     }
 
     if(frequencyMetaData) {
-        curDate = (options.frequency?this.getDate(frequencyMetaData):"");
+        curDate = (options.frequency?self.getDate(frequencyMetaData):"");
     }
 
     var filename = options.filename;
@@ -135,8 +136,7 @@ FileStreamRotator.getStream = function(options){
         console.log("Logging to", logfile);
     }
     var rotateStream = fs.createWriteStream(logfile, {flags: 'a'});
-    var frequency = this.getFrequency(options.frequency);
-    if(frequency.type == 'daily' ||  frequency.type == 'h' || frequency.type == 'm') {
+    if(frequencyMetaData.type == 'daily' ||  frequencyMetaData.type == 'h' || frequencyMetaData.type == 'm') {
         if(verbose){
             console.log("Rotating file", options.frequency);
         }
@@ -154,7 +154,6 @@ FileStreamRotator.getStream = function(options){
                 rotateStream = fs.createWriteStream(newLogfile, {flags: 'a'});
             }
             rotateStream.write(str,encoding);
-
         }).bind(this);
         return stream;
     } else {
