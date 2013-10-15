@@ -108,12 +108,8 @@ var tests = {
         var options = { filename: __dirname + '/log/program.log', frequency: '1m', verbose: true }
 
         var stream = fsr.getStream(options);
-        process.__defineGetter__('stdout', function() {
-            return stream;
-        });
-        process.__defineGetter__('stderr', function() {
-            return stream;
-        });
+        process.__defineGetter__('stdout', function() { return stream;});
+        process.__defineGetter__('stderr', function() { return stream;});
 
         setTimeout(function(){
             stream.write('Foo bar');
