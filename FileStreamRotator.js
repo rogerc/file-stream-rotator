@@ -132,22 +132,21 @@ FileStreamRotator.getStream = function(options){
     var logfile = filename + (curDate?"." + curDate:"");
     var verbose = (options.verbose !== undefined?options.verbose:true);
     if(verbose){
-        console.log("Logging to " + logfile);
+        console.log("Logging to", logfile);
     }
     var rotateStream = fs.createWriteStream(logfile, {flags: 'a'});
     var frequency = this.getFrequency(options.frequency);
     if(frequency.type == 'daily' ||  frequency.type == 'h' || frequency.type == 'm') {
         if(verbose){
-            console.log("Rotating file " + options.frequency);
+            console.log("Rotating file", options.frequency);
         }
         var stream = {end: rotateStream.end};
         stream.write = (function(str,encoding){
             var newDate = this.getDate(frequencyMetaData);
             if(newDate != curDate){
-                console.log('get here');
                 var newLogfile = filename + (curDate?"." + newDate:"");
                 if(verbose){
-                    console.log("Changing logs from " + logfile + " to " + newLogfile);
+                    console.log("Changing logs from %s to %s", logfile, newLogfile);
                 }
                 curDate = newDate;
                 logfile = newLogfile;
