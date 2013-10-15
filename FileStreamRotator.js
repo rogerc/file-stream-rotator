@@ -93,29 +93,28 @@ FileStreamRotator.getFrequency = function(frequency) {
 }
 
 FileStreamRotator.getDate = function(format) {
-    var date = new Date();
-
     if(staticFrequency.indexOf(format.type) !== -1 && format.type !== 'daily' ) {
 
         switch(format.type) {
             case 'm':
-                return moment().add('m', format.digit).format(DATE_FORMAT);
+                var minute = Math.floor(moment().minutes()/format.digit) * format.digit;
+                return moment().minutes(minute).format(DATE_FORMAT);
                 break;
             case 'h':
-                return moment().add('h', format.digit).format(DATE_FORMAT);
+                var hour = Math.floor(moment().hour()/format.digit) * format.digit;
+                return moment().hour(hour).format(DATE_FORMAT);
                 break;
             case 'test':
                 return moment().format(DATE_FORMAT);
         }
-
     }
     return moment().format('YYYYMMDD');
 }
 
 FileStreamRotator.getStream = function(options){
-
     var frequencyMetaData = null;
-    var curDate = null
+    var curDate = null;
+
     if(!options.filename){
         console.error("No filename supplied. Defaulting to STDOUT");
         return process.stdout;
@@ -136,17 +135,19 @@ FileStreamRotator.getStream = function(options){
         console.log("Logging to " + logfile);
     }
     var rotateStream = fs.createWriteStream(logfile, {flags: 'a'});
-    if(options.frequency == 'daily' ||  options.frequency== 'h' || options.frequency == 'm') {
+    var frequency = this.getFrequency(options.frequency);
+    if(frequency.type == 'daily' ||  frequency.type == 'h' || frequency.type == 'm') {
         if(verbose){
             console.log("Rotating file " + options.frequency);
         }
         var stream = {end: rotateStream.end};
         stream.write = (function(str,encoding){
-            var newDate = getDate(frequencyMetaData);
+            var newDate = this.getDate(frequencyMetaData);
             if(newDate != curDate){
+                console.log('get here');
                 var newLogfile = filename + (curDate?"." + newDate:"");
                 if(verbose){
-                    console.log("Changing logs from " + logfile+ " to " + newLogfile);
+                    console.log("Changing logs from " + logfile + " to " + newLogfile);
                 }
                 curDate = newDate;
                 logfile = newLogfile;

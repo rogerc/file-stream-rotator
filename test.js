@@ -91,7 +91,9 @@ var tests = {
         var opt2 = {type: 'h', digit: 1};
         var opt3 = {type: 'm', digit: 30};
         var opt4 = {type: 'm', digit: 45};
-        var opt5 = {type: 'h', digit: 1};
+        var opt5 = {type: 'h', digit: 3};
+        var opt6 = {type: 'm', digit: 5};
+
 
 
         console.log(fsr.getDate(opt));
@@ -100,6 +102,7 @@ var tests = {
         console.log(fsr.getDate(opt3));
         console.log(fsr.getDate(opt4));
         console.log(fsr.getDate(opt5));
+        console.log(fsr.getDate(opt6));
     },
     testGetStream: function() {
         var options = { filename: __dirname + '/log/program.log', frequency: '5m', verbose: false }
