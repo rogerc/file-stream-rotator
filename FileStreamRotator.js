@@ -79,7 +79,7 @@ FileStreamRotator.getFrequency = function(frequency) {
 
             var numRegex = frequency.match(/(.*)[A-Za-z]/);
             if(numRegex && Array.isArray(numRegex) && numRegex.length >= 1 && numRegex[1] !== '') {
-                var num = numRegex[1]/1;
+                var num = numRegex[1]/1; //turn it into a 'number' if its a 'string'
                 return _checkNumAndType(type, num);
             } else {
                 return false;
