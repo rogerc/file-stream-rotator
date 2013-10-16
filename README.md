@@ -15,7 +15,7 @@ npm install file-stream-rotator
 
 ## Usage
 
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"daily", verbose: false})
+    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"daily", verbose: false});
     .....
     // Use new stream in express
     app.use(express.logger({stream: rotatingLogStream, format: "default"}));
@@ -23,7 +23,9 @@ npm install file-stream-rotator
     frequency options include:
     * daily
     * rotate on given minutes using the 'm' option i.e. 5m or 30m
+    ** var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"5m", verbose: false});
     * rotate on the hour or any specified number of hours
+    ** var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"1h", verbose: false});
     * test - creates a log file with a date suffix
 
 ## NPM Maintainers
