@@ -46,11 +46,21 @@ FileStreamRotator.getStream = function(options){
         var date = new Date();
         switch(format){
             case 'test':
+            case 'minute':
                 return ( date.getFullYear() + "" + padNumber((date.getMonth()+1)) + "" + padNumber(date.getDate()) +
-                    "" + padNumber(date.getHours()) + "" + padNumber(date.getMinutes()) )
-                    ;
+                    "" + padNumber(date.getHours()) + "" + padNumber(date.getMinutes()) );
+                break;
+            case '5minutes':
+                return ( date.getFullYear() + "" + padNumber((date.getMonth()+1)) + "" + padNumber(date.getDate()) +
+                    "" + padNumber(date.getHours()) + "" + padNumber(parseInt((new Date()).getMinutes()/5)*5) );
+                break;
+            case 'hourly':
+                return ( date.getFullYear() + "" + padNumber((date.getMonth()+1)) + "" + padNumber(date.getDate()) +
+                    "" + padNumber(date.getHours()) + "00");
+                break;
             default:
                 return date.getFullYear() + "" + padNumber((date.getMonth()+1)) + "" + padNumber(date.getDate());
+                break;
 
         }
     }
@@ -70,6 +80,9 @@ FileStreamRotator.getStream = function(options){
     var rotateStream = fs.createWriteStream(logfile, {flags: 'a'});
     switch(options.frequency){
         case 'test':
+        case 'minute':
+        case '5minutes':
+        case 'hourly':
         case 'daily':
             if(verbose){
                 console.log("Rotating file " + options.frequency);
