@@ -129,7 +129,7 @@ var tests = {
             if(!exists) {
                 console.log('Creating the log directory as one doesnt exist');
                 fs.mkdir(logdir, function(err) {
-                    console.log('err =', err);
+                    console.error('Trouble creating directory %s', logdir);
                     if(err) {
                         throw err;
                     }
