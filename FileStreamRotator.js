@@ -42,7 +42,7 @@ FileStreamRotator.getStream = function(options){
         return number;
     }
 
-    function getDate(format){
+    function getDate(format, number_of_rotations){
         var date = new Date();
         switch(format){
             case 'test':
@@ -54,9 +54,19 @@ FileStreamRotator.getStream = function(options){
                 return ( date.getFullYear() + "" + padNumber((date.getMonth()+1)) + "" + padNumber(date.getDate()) +
                     "" + padNumber(date.getHours()) + "" + padNumber(parseInt((new Date()).getMinutes()/5)*5) );
                 break;
+            case 'Xminutes':
+                var Xminutes = 60/(number_of_rotations || 12);
+                return ( date.getFullYear() + "" + padNumber((date.getMonth()+1)) + "" + padNumber(date.getDate()) +
+                    "" + padNumber(date.getHours()) + "" + padNumber(parseInt((new Date()).getMinutes()/Xminutes)*Xminutes) );
+                break;
             case 'hourly':
                 return ( date.getFullYear() + "" + padNumber((date.getMonth()+1)) + "" + padNumber(date.getDate()) +
                     "" + padNumber(date.getHours()) + "00");
+                break;
+            case 'Xhours':
+                var Xhours = 24/(number_of_rotations || 24);
+                return ( date.getFullYear() + "" + padNumber((date.getMonth()+1)) + "" + padNumber(date.getDate()) +
+                    "" + padNumber(parseInt((new Date()).getHours()/Xhours)*Xhours) + "00");
                 break;
             default:
                 return date.getFullYear() + "" + padNumber((date.getMonth()+1)) + "" + padNumber(date.getDate());
@@ -82,14 +92,16 @@ FileStreamRotator.getStream = function(options){
         case 'test':
         case 'minute':
         case '5minutes':
+        case 'Xminutes':
         case 'hourly':
+        case 'Xhours':
         case 'daily':
             if(verbose){
                 console.log("Rotating file " + options.frequency);
             }
             var stream = {end: rotateStream.end};
             stream.write = (function(str,encoding){
-                var newDate = getDate(options.frequency);
+                var newDate = getDate(options.frequency, options.number_of_rotations);
                 if(newDate != curDate){
                     var newLogfile = filename + (curDate?"." + newDate:"");
                     if(verbose){
