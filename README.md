@@ -1,6 +1,8 @@
 file-stream-rotator
 ===================
 
+[![Code Climate](https://codeclimate.com/github/holidayextras/file-stream-rotator.png)](https://codeclimate.com/github/holidayextras/file-stream-rotator)
+
 NodeJS file stream rotator
 
 ## Purpose
