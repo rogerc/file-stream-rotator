@@ -38,14 +38,16 @@ var DATE_FORMAT = ('YYYYMMDDHHmm');
 
 var staticFrequency = ['daily', 'test', 'm', 'h'];
 
-var _humanizeDate = function(date){
-  var humanizeDate = '';
-  humanizeDate += date.slice(0, 4);
+var _generateFileName = function(filename, date) {
+  var humanizeDate = date.slice(0, 4);
   humanizeDate += '-';
   humanizeDate += date.slice(4, 6);
   humanizeDate += '-';
   humanizeDate += date.slice(6, 8);
-  return humanizeDate;
+  filename += '-';
+  filename += humanizeDate;
+  filename += '.log';
+  return filename;
 };
 
 var _checkNumAndType = function(type, num) {
@@ -152,8 +154,7 @@ module.exports = {
     }
 
     var filename = options.filename;
-
-    var logfile = filename + '-' + _humanizeDate(curDate) + '.log';
+    var logfile = _generateFileName(filename, curDate);
     var verbose = (options.verbose !== undefined ? options.verbose : true);
     if (verbose) {
       console.log('Logging to', logfile);
