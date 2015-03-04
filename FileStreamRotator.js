@@ -36,72 +36,72 @@ var DATE_FORMAT = ('YYYYMMDDHHmm');
 module.exports = FileStreamRotator = {};
 var staticFrequency = ['daily', 'test', 'm', 'h'];
 
-var _checkNumAndType = function(type, num) {
-  if(typeof num == 'number') {
-    switch (type) {
-      case 'm':
-        if(num < 0 || num > 60) {
-          return false;
+var _checkNumAndType = function (type, num) {
+    if (typeof num == 'number') {
+        switch (type) {
+            case 'm':
+                if (num < 0 || num > 60) {
+                    return false;
+                }
+                break;
+            case 'h':
+                if (num < 0 || num > 24) {
+                    return false;
+                }
+                break;
         }
-        break;
-      case 'h':
-        if(num < 0 || num > 24) {
-          return false;
-        }
-        break;
+        return {type: type, digit: num};
     }
-    return {type: type, digit: num};
-  }
 }
 
-var _checkDailyAndTest = function(freqType) {
-    switch(freqType) {
+var _checkDailyAndTest = function (freqType) {
+    switch (freqType) {
         case 'daily':
-          return {type: freqType, digit: undefined};
-          break;
+            return {type: freqType, digit: undefined};
+            break;
         case 'test':
-          return {type: freqType, digit: 0};
+            return {type: freqType, digit: 0};
     }
     return false;
 }
 
-FileStreamRotator.getFrequency = function(frequency) {
-    for(var i = 0; i < staticFrequency.length; i++) {
+FileStreamRotator.getFrequency = function (frequency) {
+    for (var i = 0; i < staticFrequency.length; i++) {
         var type = staticFrequency[i];
         var regex = frequency.toLowerCase().match(type);
-        if(regex && Array.isArray(regex) && regex.length > 0) {
+        if (regex && Array.isArray(regex) && regex.length > 0) {
             var freqType = regex[0];
 
             var dailyOrTest = _checkDailyAndTest(freqType);
-            if(dailyOrTest) {
-              return dailyOrTest;
+            if (dailyOrTest) {
+                return dailyOrTest;
             }
 
             var numRegex = frequency.match(/(.*)[A-Za-z]/);
-            if(numRegex && Array.isArray(numRegex) && numRegex.length >= 1 && numRegex[1] !== '') {
-                var num = numRegex[1]/1; //turn it into a 'number' if its a 'string'
+            if (numRegex && Array.isArray(numRegex) && numRegex.length >= 1 && numRegex[1] !== '') {
+                var num = numRegex[1] / 1; //turn it into a 'number' if its a 'string'
                 return _checkNumAndType(type, num);
             } else {
                 return false;
             }
         } else { //no match so return false once reaching the end of the loop
-            if(i == staticFrequency.length-1) {
+            if (i == staticFrequency.length - 1) {
                 return false;
             }
         }
     }
 }
 
-FileStreamRotator.getDate = function(format) {
-    if(staticFrequency.indexOf(format.type) !== -1 && format.type !== 'daily' ) {
+FileStreamRotator.getDate = function (format) {
+    if (staticFrequency.indexOf(format.type) !== -1 && format.type !== 'daily') {
 
-        switch(format.type) {
+        switch (format.type) {
             case 'm':
-                var minute = Math.floor(moment().minutes()/format.digit) * format.digit;
+                var minute = Math.floor(moment().minutes() / format.digit) * format.digit;
                 return moment().minutes(minute).format(DATE_FORMAT);
                 break;
             case 'h':
-                var hour = Math.floor(moment().hour()/format.digit) * format.digit;
+                var hour = Math.floor(moment().hour() / format.digit) * format.digit;
                 return moment().hour(hour).format(DATE_FORMAT);
                 break;
             case 'test':
@@ -111,41 +111,41 @@ FileStreamRotator.getDate = function(format) {
     return moment().format('YYYYMMDD');
 }
 
-FileStreamRotator.getStream = function(options){
+FileStreamRotator.getStream = function (options) {
     var frequencyMetaData = null;
     var curDate = null;
     var self = this;
 
-    if(!options.filename){
+    if (!options.filename) {
         console.error("No filename supplied. Defaulting to STDOUT");
         return process.stdout;
     }
 
-    if(options.frequency) {
+    if (options.frequency) {
         frequencyMetaData = self.getFrequency(options.frequency);
     }
 
-    if(frequencyMetaData) {
-        curDate = (options.frequency?self.getDate(frequencyMetaData):"");
+    if (frequencyMetaData) {
+        curDate = (options.frequency ? self.getDate(frequencyMetaData) : "");
     }
 
     var filename = options.filename;
-    var logfile = filename + (curDate?"." + curDate:"");
-    var verbose = (options.verbose !== undefined?options.verbose:true);
-    if(verbose){
+    var logfile = filename + (curDate ? "." + curDate : "");
+    var verbose = (options.verbose !== undefined ? options.verbose : true);
+    if (verbose) {
         console.log("Logging to", logfile);
     }
     var rotateStream = fs.createWriteStream(logfile, {flags: 'a'});
-    if(frequencyMetaData.type == 'daily' ||  frequencyMetaData.type == 'h' || frequencyMetaData.type == 'm') {
-        if(verbose){
+    if (frequencyMetaData.type == 'daily' || frequencyMetaData.type == 'h' || frequencyMetaData.type == 'm') {
+        if (verbose) {
             console.log("Rotating file", options.frequency);
         }
         var stream = {end: rotateStream.end};
-        stream.write = (function(str,encoding){
+        stream.write = (function (str, encoding) {
             var newDate = this.getDate(frequencyMetaData);
-            if(newDate != curDate){
-                var newLogfile = filename + (curDate?"." + newDate:"");
-                if(verbose){
+            if (newDate != curDate) {
+                var newLogfile = filename + (curDate ? "." + newDate : "");
+                if (verbose) {
                     console.log("Changing logs from %s to %s", logfile, newLogfile);
                 }
                 curDate = newDate;
@@ -153,11 +153,11 @@ FileStreamRotator.getStream = function(options){
                 rotateStream.destroy();
                 rotateStream = fs.createWriteStream(newLogfile, {flags: 'a'});
             }
-            rotateStream.write(str,encoding);
+            rotateStream.write(str, encoding);
         }).bind(this);
         return stream;
     } else {
-        if(verbose){
+        if (verbose) {
             console.log("File won't be rotated");
         }
         return rotateStream;
