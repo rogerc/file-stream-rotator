@@ -1,4 +1,4 @@
-var fsr = require('./FileStreamRotator');
+var fsr = require('./index');
 var assert = require('assert');
 var fs = require('fs');
 
@@ -95,7 +95,10 @@ var tests = {
         var opt5 = {type: 'h', digit: 3};
         var opt6 = {type: 'm', digit: 5};
 
-
+        var format1 = 'YYYYMMDD';
+        var format2 = 'YYYY-MM-DD';
+        var format3 = 'YYYYMMDD.HHmmss';
+        var format4 = 'YYYY-MM-DD:HH:mm:ss';
 
         console.log(fsr.getDate(opt));
         console.log(fsr.getDate(opt1));
@@ -104,13 +107,37 @@ var tests = {
         console.log(fsr.getDate(opt4));
         console.log(fsr.getDate(opt5));
         console.log(fsr.getDate(opt6));
+
+        console.log(fsr.getDate({type: 'test', digit: 0},format1));
+        console.log(fsr.getDate({type: 'test', digit: 0},format2));
+        console.log(fsr.getDate({type: 'test', digit: 0},format3));
+        console.log(fsr.getDate({type: 'test', digit: 0},format4));
     },
     testGetStream: function() {
 
         var logdir = __dirname + '/log/';
 
         var test = function() {
-            var options = { filename: logdir + 'program.log', frequency: '1m', verbose: true }
+
+            var options1 = { filename: logdir + 'program1.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD' };
+            var options2 = { filename: logdir + 'program2.log', frequency: '1m', verbose: true};
+            var options3 = { filename: logdir + 'program3-%DATE%.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD'};
+            var options4 = { filename: logdir + 'program4-%DATE%.log', verbose: true, date_format: 'YYYY-MM-DD'};
+            var options5 = { filename: logdir + 'program5-%DATE%.log', verbose: true};
+
+            var stream1 = fsr.getStream(options1);
+            stream1.write('formatted date');
+            var stream2 = fsr.getStream(options2);
+            stream2.write('default date');
+            var stream3 = fsr.getStream(options3);
+            stream3.write('date mid filename');
+            var stream4 = fsr.getStream(options4);
+            stream4.write('date mid filename without rotation');
+            var stream5 = fsr.getStream(options5);
+            stream5.write('dafault date mid filename without rotation');
+
+
+            var options = { filename: logdir + 'program.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD:HH:mm' };
 
             var stream = fsr.getStream(options);
             process.__defineGetter__('stdout', function() { return stream;});

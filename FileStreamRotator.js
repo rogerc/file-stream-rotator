@@ -1,3 +1,5 @@
+'use strict';
+
 /*!
  * FileStreamRotator
  * Copyright(c) 2012 Holiday Extras.
@@ -9,7 +11,7 @@
  */
 var fs = require('fs');
 var moment = require('moment');
-var DATE_FORMAT = ('YYYYMMDDHHmm');
+
 
 /**
  * FileStreamRotator:
@@ -32,9 +34,12 @@ var DATE_FORMAT = ('YYYYMMDDHHmm');
  * @return {Object}
  * @api public
  */
+var FileStreamRotator = {};
 
-module.exports = FileStreamRotator = {};
+module.exports = FileStreamRotator;
+
 var staticFrequency = ['daily', 'test', 'm', 'h'];
+var DATE_FORMAT = ('YYYYMMDDHHmm');
 
 var _checkNumAndType = function (type, num) {
     if (typeof num == 'number') {
@@ -92,29 +97,31 @@ FileStreamRotator.getFrequency = function (frequency) {
     }
 }
 
-FileStreamRotator.getDate = function (format) {
-    if (staticFrequency.indexOf(format.type) !== -1 && format.type !== 'daily') {
-
+FileStreamRotator.getDate = function (format, date_format) {
+    date_format = date_format || DATE_FORMAT;
+    if (format && staticFrequency.indexOf(format.type) !== -1 && format.type !== 'daily') {
         switch (format.type) {
             case 'm':
                 var minute = Math.floor(moment().minutes() / format.digit) * format.digit;
-                return moment().minutes(minute).format(DATE_FORMAT);
+                return moment().minutes(minute).format(date_format);
                 break;
             case 'h':
                 var hour = Math.floor(moment().hour() / format.digit) * format.digit;
-                return moment().hour(hour).format(DATE_FORMAT);
+                return moment().hour(hour).format(date_format);
                 break;
             case 'test':
-                return moment().format(DATE_FORMAT);
+                return moment().format(date_format);
         }
     }
-    return moment().format('YYYYMMDD');
+    return moment().format(date_format);
 }
 
 FileStreamRotator.getStream = function (options) {
     var frequencyMetaData = null;
     var curDate = null;
     var self = this;
+
+    var dateFormat = (options.date_format || DATE_FORMAT);
 
     if (!options.filename) {
         console.error("No filename supplied. Defaulting to STDOUT");
@@ -126,25 +133,32 @@ FileStreamRotator.getStream = function (options) {
     }
 
     if (frequencyMetaData) {
-        curDate = (options.frequency ? self.getDate(frequencyMetaData) : "");
+        curDate = (options.frequency ? self.getDate(frequencyMetaData,dateFormat) : "");
     }
 
     var filename = options.filename;
     var logfile = filename + (curDate ? "." + curDate : "");
+    if(filename.match(/%DATE%/)){
+        logfile = filename.replace('%DATE%',(curDate?curDate:self.getDate(null,dateFormat)));
+    }
     var verbose = (options.verbose !== undefined ? options.verbose : true);
     if (verbose) {
         console.log("Logging to", logfile);
     }
     var rotateStream = fs.createWriteStream(logfile, {flags: 'a'});
-    if (frequencyMetaData.type == 'daily' || frequencyMetaData.type == 'h' || frequencyMetaData.type == 'm') {
+    if (curDate && frequencyMetaData && (frequencyMetaData.type == 'daily' || frequencyMetaData.type == 'h' || frequencyMetaData.type == 'm')) {
         if (verbose) {
             console.log("Rotating file", options.frequency);
         }
         var stream = {end: rotateStream.end};
         stream.write = (function (str, encoding) {
-            var newDate = this.getDate(frequencyMetaData);
+            var newDate = this.getDate(frequencyMetaData,dateFormat);
             if (newDate != curDate) {
                 var newLogfile = filename + (curDate ? "." + newDate : "");
+                if(filename.match(/%DATE%/) && curDate){
+                    newLogfile = filename.replace('%DATE%',newDate);
+                }
+
                 if (verbose) {
                     console.log("Changing logs from %s to %s", logfile, newLogfile);
                 }

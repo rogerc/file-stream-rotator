@@ -17,8 +17,17 @@ npm install file-stream-rotator
 
 ## Usage
 
+    # Default date added at the end of the file
     var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"daily", verbose: false});
+
+    # Default date added using file pattern
+    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test-%DATE%.log", frequency:"daily", verbose: false});
+
+    # Custom date added using file pattern using moment.js formats
+    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test-%DATE%.log", frequency:"daily", verbose: false, date_format: "YYYY-MM-DD"});
+
     .....
+    
     // Use new stream in express
     app.use(express.logger({stream: rotatingLogStream, format: "default"}));
     .....
