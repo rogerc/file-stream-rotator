@@ -137,7 +137,7 @@ var tests = {
             stream5.write('dafault date mid filename without rotation');
 
 
-            var options = { filename: logdir + 'program.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD:HH:mm' };
+            var options = { filename: logdir + 'program-%DATE%.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD:HH:mm' };
 
             var stream = fsr.getStream(options);
             process.__defineGetter__('stdout', function() { return stream;});
@@ -156,14 +156,15 @@ var tests = {
             if(!exists) {
                 console.log('Creating the log directory as one doesnt exist');
                 fs.mkdir(logdir, function(err) {
-                    console.error('Trouble creating directory %s', logdir);
                     if(err) {
+                        console.error('Trouble creating directory %s', logdir);
                         throw err;
                     }
                     test();
                 });
+            }else{
+                test();
             }
-            test();
         });
     }
 }
