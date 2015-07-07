@@ -9,7 +9,8 @@
 /**
  * Module dependencies.
  */
-var fs = require('fs');
+var fs = require('fs-extra');
+var path = require('path');
 var moment = require('moment');
 
 
@@ -164,6 +165,8 @@ FileStreamRotator.getStream = function (options) {
                 }
                 curDate = newDate;
                 logfile = newLogfile;
+                var logDir = path.dirname(newLogfile);
+                fs.ensureDirSync(logDir);
                 rotateStream.destroy();
                 rotateStream = fs.createWriteStream(newLogfile, {flags: 'a'});
             }
