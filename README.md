@@ -1,3 +1,5 @@
+####NOTE: This project is no longer maintained. If you're interested in taking ownership, please contact us####
+
 file-stream-rotator
 ===================
 
