@@ -9,7 +9,8 @@
 /**
  * Module dependencies.
  */
-var fs = require('fs');
+var fs = require('fs-extra');
+var path = require('path');
 var moment = require('moment');
 
 
@@ -145,6 +146,8 @@ FileStreamRotator.getStream = function (options) {
     if (verbose) {
         console.log("Logging to", logfile);
     }
+    var logdir = path.dirname(logfile);
+    fs.ensureDirSync(logdir);
     var rotateStream = fs.createWriteStream(logfile, {flags: 'a'});
     if (curDate && frequencyMetaData && (frequencyMetaData.type == 'daily' || frequencyMetaData.type == 'h' || frequencyMetaData.type == 'm')) {
         if (verbose) {
@@ -164,6 +167,8 @@ FileStreamRotator.getStream = function (options) {
                 }
                 curDate = newDate;
                 logfile = newLogfile;
+                var newLogdir = path.dirname(newLogfile);
+                fs.ensureDirSync(newLogdir);
                 rotateStream.destroy();
                 rotateStream = fs.createWriteStream(newLogfile, {flags: 'a'});
             }
