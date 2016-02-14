@@ -150,7 +150,7 @@ FileStreamRotator.getStream = function (options) {
         if (verbose) {
             console.log("Rotating file", options.frequency);
         }
-        var stream = {end: rotateStream.end};
+        var stream = {end: rotateStream.end, on:rotateStream.on};
         stream.write = (function (str, encoding) {
             var newDate = this.getDate(frequencyMetaData,dateFormat);
             if (newDate != curDate) {
