@@ -4,6 +4,7 @@ file-stream-rotator
 ===================
 
 [![Code Climate](https://codeclimate.com/github/holidayextras/file-stream-rotator.png)](https://codeclimate.com/github/holidayextras/file-stream-rotator)
+[![Build Status](https://travis-ci.org/holidayextras/file-stream-rotator.svg?branch=master)](https://travis-ci.org/holidayextras/file-stream-rotator)
 
 NodeJS file stream rotator
 
