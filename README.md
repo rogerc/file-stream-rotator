@@ -46,8 +46,6 @@ npm install file-stream-rotator
 
 The npm module for this library is maintained by:
 
-* [Dan Jenkins](http://github.com/danjenkins)
-* [Roger Castells](http://github.com/rogerc)
 * [Viktor Trako](http://github.com/viktort)
 
 ## License
