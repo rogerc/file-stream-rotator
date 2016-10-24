@@ -25,6 +25,7 @@
     "author": "Roger Castells",
     "license": "MIT",
     "dependencies": {
-        "moment": "^2.11.2"
+        "moment": "^2.11.2",
+        "events": "^1.1.1"
     }
 }

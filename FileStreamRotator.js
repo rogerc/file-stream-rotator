@@ -11,7 +11,7 @@
  */
 var fs = require('fs');
 var moment = require('moment');
-
+var EventEmitter = require('events').EventEmitter;
 
 /**
  * FileStreamRotator:
@@ -34,8 +34,7 @@ var moment = require('moment');
  * @return {Object}
  * @api public
  */
-var FileStreamRotator = {};
-
+var FileStreamRotator = new EventEmitter();
 module.exports = FileStreamRotator;
 
 var staticFrequency = ['daily', 'test', 'm', 'h'];
@@ -165,6 +164,8 @@ FileStreamRotator.getStream = function (options) {
                 curDate = newDate;
                 logfile = newLogfile;
                 rotateStream.destroy();
+                
+                FileStreamRotator.emit('fileStreamRotated', logfile, newLogfile);
                 rotateStream = fs.createWriteStream(newLogfile, {flags: 'a'});
             }
             rotateStream.write(str, encoding);
