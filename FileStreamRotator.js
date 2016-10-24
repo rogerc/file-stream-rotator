@@ -153,6 +153,7 @@ FileStreamRotator.getStream = function (options) {
         stream.write = (function (str, encoding) {
             var newDate = this.getDate(frequencyMetaData,dateFormat);
             if (newDate != curDate) {
+                var oldFile = logfile;
                 var newLogfile = filename + (curDate ? "." + newDate : "");
                 if(filename.match(/%DATE%/) && curDate){
                     newLogfile = filename.replace('%DATE%',newDate);
@@ -165,8 +166,9 @@ FileStreamRotator.getStream = function (options) {
                 logfile = newLogfile;
                 rotateStream.destroy();
                 
-                FileStreamRotator.emit('fileStreamRotated', logfile, newLogfile);
+                
                 rotateStream = fs.createWriteStream(newLogfile, {flags: 'a'});
+                FileStreamRotator.emit('fileStreamRotated', oldFile, newLogfile);
             }
             rotateStream.write(str, encoding);
         }).bind(this);
