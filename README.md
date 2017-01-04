@@ -1,10 +1,7 @@
-####NOTE: This project is no longer maintained. If you're interested in taking ownership, please contact us####
+###NOTE: This project was transferred over to me on January 3rd. I will be working on it over January, reviewing the PRs with the goal to release an updated release by the end of the month at the latest.
 
 file-stream-rotator
 ===================
-
-[![Code Climate](https://codeclimate.com/github/holidayextras/file-stream-rotator.png)](https://codeclimate.com/github/holidayextras/file-stream-rotator)
-[![Build Status](https://travis-ci.org/holidayextras/file-stream-rotator.svg?branch=master)](https://travis-ci.org/holidayextras/file-stream-rotator)
 
 NodeJS file stream rotator
 
@@ -44,9 +41,9 @@ npm install file-stream-rotator
 
 ## NPM Maintainers
 
-The npm module for this library is maintained by:
+The npm module for this library will be maintained by:
 
-* [Viktor Trako](http://github.com/viktort)
+* [Roger C](http://github.com/rogerc)
 
 ## License
 
