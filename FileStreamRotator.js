@@ -10,6 +10,7 @@
  * Module dependencies.
  */
 var fs = require('fs');
+var path = require('path');
 var moment = require('moment');
 var EventEmitter = require('events');
 
@@ -163,7 +164,7 @@ FileStreamRotator.getStream = function (options) {
     var oldFile = null;
     var logfile = filename + (curDate ? "." + curDate : "");
     if(filename.match(/%DATE%/)){
-        logfile = filename.replace('%DATE%',(curDate?curDate:self.getDate(null,dateFormat)));
+        logfile = filename.replace(/%DATE%/g,(curDate?curDate:self.getDate(null,dateFormat)));
     }
     var verbose = (options.verbose !== undefined ? options.verbose : true);
     if (verbose) {
@@ -179,6 +180,8 @@ FileStreamRotator.getStream = function (options) {
         }
         logfile = t_log;
     }
+
+    mkDirForFile(logfile);
 
     var rotateStream = fs.createWriteStream(logfile, {flags: 'a'});
     if (curDate && frequencyMetaData && (staticFrequency.indexOf(frequencyMetaData.type) > -1)) {
@@ -196,11 +199,11 @@ FileStreamRotator.getStream = function (options) {
             if (newDate != curDate || (fileSize && curSize > fileSize)) {
                 var newLogfile = filename + (curDate ? "." + newDate : "");
                 if(filename.match(/%DATE%/) && curDate){
-                    newLogfile = filename.replace('%DATE%',newDate);
+                    newLogfile = filename.replace(/%DATE%/g,newDate);
                 }
 
                 if(fileSize && curSize > fileSize){
-                    fileCount++
+                    fileCount++;
                     newLogfile += "." + fileCount;
                 }else{
                     // reset file count
@@ -215,6 +218,9 @@ FileStreamRotator.getStream = function (options) {
                 oldFile = logfile;
                 logfile = newLogfile;
                 rotateStream.destroy();
+
+                mkDirForFile(logfile);
+
                 rotateStream = fs.createWriteStream(newLogfile, {flags: 'a'});
                 stream.emit('new',newLogfile);
                 stream.emit('rotate',oldFile, newLogfile);
@@ -237,6 +243,24 @@ FileStreamRotator.getStream = function (options) {
         return rotateStream;
     }
 }
+
+var mkDirForFile = function(pathWithFile){
+    var _path = path.dirname(pathWithFile);
+    // var start = Date.now();
+    _path.split(path.sep).reduce(
+        function(fullPath, folder) {
+            fullPath += folder + path.sep;
+            // console.log('current path', fullPath, 'current folder', folder);
+            if (!fs.existsSync(fullPath)) {
+                fs.mkdirSync(fullPath);
+            }
+            return fullPath;
+        },
+        ''
+    );
+    // var end = Date.now();
+    // console.log("Took " + (end - start) + "ms to check folders");
+};
 
 
 var BubbleEvents = function BubbleEvents(emitter,proxy){
