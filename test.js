@@ -3,6 +3,19 @@ var assert = require('assert');
 var fs = require('fs');
 
 var tests = {
+    testFileSizes: function () {
+        [
+            ["3k",3072],
+            ["5M",5242880],
+            ["0.5G",536870912],
+            ["0.5T",null],
+            ["1mega",null],
+            ["10 giga",null]
+        ].map(function(fsize){
+            console.log(fsize[0],fsize[1],fsr.parseFileSize(fsize[0]));
+            assert.ok(fsize[1] == fsr.parseFileSize(fsize[0]));
+        })
+    },
     testFrequency: function () {
         var opt1 = 'M544';
         var opt2 = '5m';

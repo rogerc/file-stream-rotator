@@ -1,9 +1,10 @@
 var moment = require('moment');
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"1m", verbose: true});
-var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"custom", verbose: true, date_format: "YYYY-MM-DD.HH.mm"});
+// var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"custom", verbose: true, date_format: "YYYY-MM-DD.HH.mm"});
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"dont-rotate", verbose: true, date_format: "YYYY-MM-DD.HH.mm.ss"});
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"daily", verbose: true, date_format: "YYYYMMDD"});
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"daily", verbose: true});
+var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"custom", verbose: true, date_format: "YYYY-MM-DD.HH.mm", size:"0.5M"});
 
 rotatingLogStream.on("error",function(){
     console.log(Date.now(), Date(), "stream error")
@@ -35,10 +36,10 @@ rotatingLogStream.on("new",function(newFile){
 var counter = 0;
 var i = setInterval(function(){
     counter++;
-    rotatingLogStream.write("test\n")
-    if(counter == 200){
+    rotatingLogStream.write("testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890\n")
+    if(counter == 2000){
         clearInterval(i);
         rotatingLogStream.end("end\n");
     }
-}, 100);
+}, 10);
 

@@ -85,6 +85,23 @@ FileStreamRotator.getFrequency = function (frequency) {
     return false;
 }
 
+FileStreamRotator.parseFileSize = function (size) {
+    if(size && typeof size == "string"){
+        var _s = size.toLowerCase().match(/^((?:0\.)?\d+)([k|m|g])$/);
+        if(_s){
+            switch(_s[2]){
+                case 'k':
+                    return _s[1]*1024
+                case 'm':
+                    return _s[1]*1024*1024
+                case 'g':
+                    return _s[1]*1024*1024*1024
+            }
+        }
+    }
+    return null;
+};
+
 FileStreamRotator.getDate = function (format, date_format) {
     date_format = date_format || DATE_FORMAT;
     if (format && staticFrequency.indexOf(format.type) !== -1) {
@@ -120,6 +137,13 @@ FileStreamRotator.getStream = function (options) {
         frequencyMetaData = self.getFrequency(options.frequency);
     }
 
+    var fileSize = null;
+    var fileCount = 0;
+    var curSize = 0;
+    if(options.size){
+        fileSize = FileStreamRotator.parseFileSize(options.size);
+    }
+
     var dateFormat = (options.date_format || DATE_FORMAT);
     if(frequencyMetaData && frequencyMetaData.type == "daily"){
         if(!options.date_format){
@@ -145,6 +169,17 @@ FileStreamRotator.getStream = function (options) {
     if (verbose) {
         console.log("Logging to", logfile);
     }
+
+    if(fileSize){
+        var t_log = logfile;
+        var f = null;
+        while(f = fs.existsSync(t_log)){
+            fileCount++;
+            t_log = logfile + "." + fileCount;
+        }
+        logfile = t_log;
+    }
+
     var rotateStream = fs.createWriteStream(logfile, {flags: 'a'});
     if (curDate && frequencyMetaData && (staticFrequency.indexOf(frequencyMetaData.type) > -1)) {
         if (verbose) {
@@ -158,11 +193,20 @@ FileStreamRotator.getStream = function (options) {
 
         stream.write = (function (str, encoding) {
             var newDate = this.getDate(frequencyMetaData,dateFormat);
-            if (newDate != curDate) {
+            if (newDate != curDate || (fileSize && curSize > fileSize)) {
                 var newLogfile = filename + (curDate ? "." + newDate : "");
                 if(filename.match(/%DATE%/) && curDate){
                     newLogfile = filename.replace('%DATE%',newDate);
                 }
+
+                if(fileSize && curSize > fileSize){
+                    fileCount++
+                    newLogfile += "." + fileCount;
+                }else{
+                    // reset file count
+                    fileCount = 0;
+                }
+                curSize = 0;
 
                 if (verbose) {
                     console.log("Changing logs from %s to %s", logfile, newLogfile);
@@ -177,6 +221,7 @@ FileStreamRotator.getStream = function (options) {
                 BubbleEvents(rotateStream,stream);
             }
             rotateStream.write(str, encoding);
+            curSize += str.length
         }).bind(this);
         process.nextTick(function(){
             stream.emit('new',logfile);
