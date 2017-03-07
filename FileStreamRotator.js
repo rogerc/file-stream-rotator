@@ -11,7 +11,7 @@
  */
 var fs = require('fs');
 var moment = require('moment');
-
+var EventEmitter = require('events');
 
 /**
  * FileStreamRotator:
@@ -137,6 +137,7 @@ FileStreamRotator.getStream = function (options) {
     }
 
     var filename = options.filename;
+    var oldFile = null;
     var logfile = filename + (curDate ? "." + curDate : "");
     if(filename.match(/%DATE%/)){
         logfile = filename.replace('%DATE%',(curDate?curDate:self.getDate(null,dateFormat)));
@@ -150,7 +151,12 @@ FileStreamRotator.getStream = function (options) {
         if (verbose) {
             console.log("Rotating file", options.frequency);
         }
-        var stream = {end: rotateStream.end};
+        var stream = new EventEmitter();
+        stream.end = function(){
+            rotateStream.end.apply(rotateStream,arguments);
+        };
+        BubbleEvents(rotateStream,stream);
+
         stream.write = (function (str, encoding) {
             var newDate = this.getDate(frequencyMetaData,dateFormat);
             if (newDate != curDate) {
@@ -163,9 +169,12 @@ FileStreamRotator.getStream = function (options) {
                     console.log("Changing logs from %s to %s", logfile, newLogfile);
                 }
                 curDate = newDate;
+                oldFile = logfile;
                 logfile = newLogfile;
                 rotateStream.destroy();
                 rotateStream = fs.createWriteStream(newLogfile, {flags: 'a'});
+                stream.emit('rotated',oldFile, newLogfile);
+                BubbleEvents(rotateStream,stream);
             }
             rotateStream.write(str, encoding);
         }).bind(this);
@@ -176,4 +185,17 @@ FileStreamRotator.getStream = function (options) {
         }
         return rotateStream;
     }
+}
+
+
+var BubbleEvents = function BubbleEvents(emitter,proxy){
+    emitter.on('close',function(){
+        proxy.emit('close');
+    })
+    emitter.on('finish',function(){
+        proxy.emit('finish');
+    })
+    emitter.on('error',function(err){
+        proxy.emit('error',err);
+    })
 }
