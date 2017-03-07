@@ -38,7 +38,7 @@ var FileStreamRotator = {};
 
 module.exports = FileStreamRotator;
 
-var staticFrequency = ['daily', 'test', 'm', 'h'];
+var staticFrequency = ['daily', 'test', 'm', 'h', 'custom'];
 var DATE_FORMAT = ('YYYYMMDDHHmm');
 
 var _checkNumAndType = function (type, num) {
@@ -61,6 +61,7 @@ var _checkNumAndType = function (type, num) {
 
 var _checkDailyAndTest = function (freqType) {
     switch (freqType) {
+        case 'custom':
         case 'daily':
             return {type: freqType, digit: undefined};
             break;
@@ -71,35 +72,22 @@ var _checkDailyAndTest = function (freqType) {
 }
 
 FileStreamRotator.getFrequency = function (frequency) {
-    for (var i = 0; i < staticFrequency.length; i++) {
-        var type = staticFrequency[i];
-        var regex = frequency.toLowerCase().match(type);
-        if (regex && Array.isArray(regex) && regex.length > 0) {
-            var freqType = regex[0];
-
-            var dailyOrTest = _checkDailyAndTest(freqType);
-            if (dailyOrTest) {
-                return dailyOrTest;
-            }
-
-            var numRegex = frequency.match(/(.*)[A-Za-z]/);
-            if (numRegex && Array.isArray(numRegex) && numRegex.length >= 1 && numRegex[1] !== '') {
-                var num = numRegex[1] / 1; //turn it into a 'number' if its a 'string'
-                return _checkNumAndType(type, num);
-            } else {
-                return false;
-            }
-        } else { //no match so return false once reaching the end of the loop
-            if (i == staticFrequency.length - 1) {
-                return false;
-            }
-        }
+    var _f = frequency.toLowerCase().match(/^(\d+)([m|h])$/)
+    if(_f){
+        return _checkNumAndType(_f[2], parseInt(_f[1]));
     }
+
+    var dailyOrTest = _checkDailyAndTest(frequency);
+    if (dailyOrTest) {
+        return dailyOrTest;
+    }
+
+    return false;
 }
 
 FileStreamRotator.getDate = function (format, date_format) {
     date_format = date_format || DATE_FORMAT;
-    if (format && staticFrequency.indexOf(format.type) !== -1 && format.type !== 'daily') {
+    if (format && staticFrequency.indexOf(format.type) !== -1) {
         switch (format.type) {
             case 'm':
                 var minute = Math.floor(moment().minutes() / format.digit) * format.digit;
@@ -109,6 +97,8 @@ FileStreamRotator.getDate = function (format, date_format) {
                 var hour = Math.floor(moment().hour() / format.digit) * format.digit;
                 return moment().hour(hour).format(date_format);
                 break;
+            case 'daily':
+            case 'custom':
             case 'test':
                 return moment().format(date_format);
         }
@@ -121,8 +111,6 @@ FileStreamRotator.getStream = function (options) {
     var curDate = null;
     var self = this;
 
-    var dateFormat = (options.date_format || DATE_FORMAT);
-
     if (!options.filename) {
         console.error("No filename supplied. Defaulting to STDOUT");
         return process.stdout;
@@ -130,6 +118,17 @@ FileStreamRotator.getStream = function (options) {
 
     if (options.frequency) {
         frequencyMetaData = self.getFrequency(options.frequency);
+    }
+
+    var dateFormat = (options.date_format || DATE_FORMAT);
+    if(frequencyMetaData && frequencyMetaData.type == "daily"){
+        if(!options.date_format){
+            dateFormat = "YYYY-MM-DD";
+        }
+        if(moment().format(dateFormat) != moment().add(2,"hours").format(dateFormat) || moment().format(dateFormat) == moment().add(1,"day").format(dateFormat)){
+            console.log("Changing type to custom as date format changes more often than once a day or not every day");
+            frequencyMetaData.type = "custom";
+        }
     }
 
     if (frequencyMetaData) {
@@ -147,9 +146,9 @@ FileStreamRotator.getStream = function (options) {
         console.log("Logging to", logfile);
     }
     var rotateStream = fs.createWriteStream(logfile, {flags: 'a'});
-    if (curDate && frequencyMetaData && (frequencyMetaData.type == 'daily' || frequencyMetaData.type == 'h' || frequencyMetaData.type == 'm')) {
+    if (curDate && frequencyMetaData && (staticFrequency.indexOf(frequencyMetaData.type) > -1)) {
         if (verbose) {
-            console.log("Rotating file", options.frequency);
+            console.log("Rotating file", frequencyMetaData.type);
         }
         var stream = new EventEmitter();
         stream.end = function(){
@@ -173,16 +172,23 @@ FileStreamRotator.getStream = function (options) {
                 logfile = newLogfile;
                 rotateStream.destroy();
                 rotateStream = fs.createWriteStream(newLogfile, {flags: 'a'});
-                stream.emit('rotated',oldFile, newLogfile);
+                stream.emit('new',newLogfile);
+                stream.emit('rotate',oldFile, newLogfile);
                 BubbleEvents(rotateStream,stream);
             }
             rotateStream.write(str, encoding);
         }).bind(this);
+        process.nextTick(function(){
+            stream.emit('new',logfile);
+        })
         return stream;
     } else {
         if (verbose) {
-            console.log("File won't be rotated");
+            console.log("File won't be rotated", options.frequency, frequencyMetaData && frequencyMetaData.type);
         }
+        process.nextTick(function(){
+            rotateStream.emit('new',logfile);
+        })
         return rotateStream;
     }
 }
@@ -197,5 +203,8 @@ var BubbleEvents = function BubbleEvents(emitter,proxy){
     })
     emitter.on('error',function(err){
         proxy.emit('error',err);
+    })
+    emitter.on('open',function(fd){
+        proxy.emit('open',fd);
     })
 }
