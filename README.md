@@ -6,7 +6,7 @@ NodeJS file stream rotator
 
 ## Purpose
 
-To provide an automated rotation of Express/Connect logs based on date.
+To provide an automated rotation of Express/Connect logs or anything else that writes to a log on a regular basis that needs to be rotated based on date. Can also be rotated based on a size limit.
 
 ## Install
 

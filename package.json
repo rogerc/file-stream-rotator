@@ -8,7 +8,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git://github.com/holidayextras/file-stream-rotator.git"
+        "url": "git://github.com/rogerc/file-stream-rotator.git"
     },
     "keywords": [
         "stream",
