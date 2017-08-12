@@ -126,7 +126,26 @@ var tests = {
         console.log(fsr.getDate({type: 'test', digit: 0},format3));
         console.log(fsr.getDate({type: 'test', digit: 0},format4));
     },
+    testAuditSettings: function(){
+        var a = fsr.setAuditLog("10d","","/tmp/a/b/c/files/%DATE%/logs");
+        console.log(a)
+        assert.equal(a.auditLog,"/tmp/a/b/c/files/.audit.json");
+        assert.equal(a.keep.amount,10);
+        assert.equal(a.keep.days,true);
+        assert.equal(a.files.length,0);
+
+        a = fsr.setAuditLog("10","/tmp/a/b/log_audit_file.json","/tmp/a/b/c/files/%DATE%/logs1");
+        console.log(a)
+        assert.equal(a.auditLog,"/tmp/a/b/log_audit_file.json");
+        assert.equal(a.keep.amount,10);
+        assert.equal(a.keep.days,false);
+        assert.equal(a.files.length,0);
+
+        // var b = fsr.writeAuditLog({keep:{days:true,amount:10},auditLog: "/tmp/aa/a/e/a/b/c/a/b/b/ba_log.json",files:[{date:Date.now(), name:"/tmp/a/b/c.log"}]});
+
+    },
     testGetStream: function() {
+        return;
 
         var logdir = __dirname + '/log/';
 
@@ -179,7 +198,7 @@ var tests = {
                 test();
             }
         });
-    }
+    },
 }
 
 Object.keys(tests).forEach(function (test) {
