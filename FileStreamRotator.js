@@ -375,8 +375,14 @@ FileStreamRotator.getStream = function (options) {
         var t_log = logfile;
         var f = null;
         while(f = fs.existsSync(t_log)){
-            fileCount++;
-            t_log = logfile + "." + fileCount;
+            var stats = fs.statSync(t_log);
+            if (stats.size < fileSize) {
+                curSize = stats.size;
+                break;
+            } else {
+                fileCount++;
+                t_log = logfile + "." + fileCount;
+            }
         }
         logfile = t_log;
     }
