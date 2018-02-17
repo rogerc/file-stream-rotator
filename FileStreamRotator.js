@@ -372,11 +372,21 @@ FileStreamRotator.getStream = function (options) {
     }
 
     if(fileSize){
+        var lastLogFile = null;
         var t_log = logfile;
         var f = null;
         while(f = fs.existsSync(t_log)){
+            lastLogFile = t_log;
             fileCount++;
             t_log = logfile + "." + fileCount;
+        }
+        if(lastLogFile){
+            var lastLogFileStats = fs.statSync(lastLogFile);
+            if(lastLogFileStats.size < fileSize){
+                t_log = lastLogFile;
+                fileCount--;
+                curSize = lastLogFileStats.size;
+            }
         }
         logfile = t_log;
     }
