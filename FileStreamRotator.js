@@ -432,7 +432,8 @@ FileStreamRotator.getStream = function (options) {
                 curDate = newDate;
                 oldFile = logfile;
                 logfile = newLogfile;
-                rotateStream.destroy();
+                // loss data when write in High frequency  fixed 
+                //rotateStream.destroy();
 
                 mkDirForFile(logfile);
 
@@ -442,7 +443,10 @@ FileStreamRotator.getStream = function (options) {
                 BubbleEvents(rotateStream,stream);
             }
             rotateStream.write(str, encoding);
-            curSize += str.length
+            // length is Incorrect when str is chinese
+            var buf = new Buffer(str),
+                strLength = buf.length;
+            curSize += strLength; 
         }).bind(this);
         process.nextTick(function(){
             stream.emit('new',logfile);
