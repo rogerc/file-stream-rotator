@@ -14,6 +14,7 @@ var fs = require('fs');
 var path = require('path');
 var moment = require('moment');
 var crypto = require('crypto');
+var shell = require('shelljs');
 
 var EventEmitter = require('events');
 
@@ -103,7 +104,32 @@ var _checkDailyAndTest = function (freqType) {
     }
     return false;
 }
-
+/**
+* ADD create shortName log link
+* @param sourceFile
+* @param targetFile
+*/
+FileStreamRotator.createShortNameLink = function(sourceFile, targetFile, oldFile){
+    var cwd = process.cwd() + '/';
+    var t = null,
+        s = null,
+        o = null;
+    var commandRm = null,
+        commandAdd = null;
+    t = path.isAbsolute(targetFile) ? targetFile : cwd+ targetFile;
+    s = path.isAbsolute(sourceFile) ? sourceFile : cwd+ sourceFile;
+    if(oldFile){
+        // 新增加日志文件
+        o = path.isAbsolute(oldFile) ? oldFile : cwd+ oldFile;
+        commandRm = 'rm ' + o;
+    }else{
+        // 初次创建日志文件
+        commandRm = 'rm ' + t;
+    }
+    shell.exec(commandRm);
+    commandAdd = 'ln -s '+ s +' ' + t;
+    shell.exec(commandAdd);
+};
 
 /**
  * Returns frequency metadata
@@ -362,9 +388,13 @@ FileStreamRotator.getStream = function (options) {
 
     var filename = options.filename;
     var oldFile = null;
+    // 定义短日志名称,如:all.log, error.log等
+    var shortName = null;
     var logfile = filename + (curDate ? "." + curDate : "");
     if(filename.match(/%DATE%/)){
         logfile = filename.replace(/%DATE%/g,(curDate?curDate:self.getDate(null,dateFormat)));
+        // 赋值短日志名称
+        shortName = filename.replace(/-?%DATE%/, '');
     }
     var verbose = (options.verbose !== undefined ? options.verbose : true);
     if (verbose) {
@@ -392,8 +422,10 @@ FileStreamRotator.getStream = function (options) {
     }
 
     mkDirForFile(logfile);
-
+    
     var rotateStream = fs.createWriteStream(logfile, {flags: 'a'});
+    // ADD 新建日志，创建短日志名文件，软连接指向最新日志文件
+    self.createShortNameLink(logfile, shortName);
     if (curDate && frequencyMetaData && (staticFrequency.indexOf(frequencyMetaData.type) > -1)) {
         if (verbose) {
             console.log(new Date(),"[FileStreamRotator] Rotating file: ", frequencyMetaData.type);
@@ -440,10 +472,12 @@ FileStreamRotator.getStream = function (options) {
                 rotateStream = fs.createWriteStream(newLogfile, {flags: 'a'});
                 stream.emit('new',newLogfile);
                 stream.emit('rotate',oldFile, newLogfile);
+                // ADD 新建日志，创建短日志名文件，软连接指向最新日志文件
+                self.createShortNameLink(newLogfile, shortName, shortName);
                 BubbleEvents(rotateStream,stream);
             }
             rotateStream.write(str, encoding);
-            // length is Incorrect when str is chinese
+            // length is incorrect when str is chinese
             var buf = new Buffer(str),
                 strLength = buf.length;
             curSize += strLength; 

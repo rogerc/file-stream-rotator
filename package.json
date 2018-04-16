@@ -1,6 +1,6 @@
 {
     "name": "file-stream-rotator",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "Automated stream rotation useful for log files",
     "main": "FileStreamRotator.js",
     "scripts": {
@@ -25,6 +25,7 @@
     "author": "Roger Castells",
     "license": "MIT",
     "dependencies": {
-        "moment": "^2.11.2"
+        "moment": "^2.11.2",
+        "shelljs": "^0.8.1"
     }
 }
