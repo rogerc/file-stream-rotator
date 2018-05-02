@@ -275,11 +275,21 @@ function removeFile(file){
 FileStreamRotator.addLogToAudit = function(logfile, audit){
     if(audit && audit.files){
         var time = Date.now();
-        audit.files.push({
-            date: time,
-            name: logfile,
-            hash: crypto.createHash('md5').update(logfile + "LOG_FILE" + time).digest("hex")
+        const matchedFiles = audit.files.some(function(file) {
+             if (file.name === logfile) {
+                file.date = time;
+                file.hash = crypto.createHash('md5').update(logfile + "LOG_FILE" + time).digest("hex");
+                return true;
+             }
+             return false;
         });
+        if (!matchedFiles) {
+            audit.files.push({
+                date: time,
+                name: logfile,
+                hash: crypto.createHash('md5').update(logfile + "LOG_FILE" + time).digest("hex")
+            });
+        }
 
         if(audit.keep.days){
             var oldestDate = moment().subtract(audit.keep.amount,"days").valueOf();
