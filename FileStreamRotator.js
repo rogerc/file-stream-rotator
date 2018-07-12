@@ -275,7 +275,9 @@ function removeFile(file){
 FileStreamRotator.addLogToAudit = function(logfile, audit){
     if(audit && audit.files){
         var time = Date.now();
-        var index = audit.files.findIndex(file => (file.name === logfile))
+        var index = audit.files.findIndex(function(file) {
+            return (file.name === logfile);
+        });
 
         if (index !== -1) {
             audit.files[index].date = time;
