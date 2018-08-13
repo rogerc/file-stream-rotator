@@ -434,7 +434,7 @@ FileStreamRotator.getStream = function (options) {
                 curDate = newDate;
                 oldFile = logfile;
                 logfile = newLogfile;
-                rotateStream.destroy();
+                rotateStream.end();
 
                 mkDirForFile(logfile);
 
