@@ -43,6 +43,9 @@ var EventEmitter = require('events');
  *                      It can be a number of files or number of days. If using days, add 'd' as the suffix.
  *
  *   - `audit_file`     Location to store the log audit file. If not set, it will be stored in the root of the application.
+ * 
+ *   - `end_stream`     End stream (true) instead of the default behaviour of destroy (false). Set value to true if when writing to the
+ *                      stream in a loop, if the application terminates or log rotates, data pending to be flushed might be lost.                    
  *
  * To use with Express / Connect, use as below.
  *
@@ -276,6 +279,14 @@ function removeFile(file){
  */
 FileStreamRotator.addLogToAudit = function(logfile, audit){
     if(audit && audit.files){
+        // Based on contribution by @nickbug - https://github.com/nickbug
+        var index = audit.files.findIndex(function(file) {
+            return (file.name === logfile);
+        });
+        if (index !== -1) {
+            // nothing to do as entry already exists.
+            return audit;
+        }
         var time = Date.now();
         audit.files.push({
             date: time,
@@ -377,6 +388,14 @@ FileStreamRotator.getStream = function (options) {
         var lastLogFile = null;
         var t_log = logfile;
         var f = null;
+        if(self.auditLog && self.auditLog.files && self.auditLog.files instanceof Array && self.auditLog.files.length > 0){
+            var lastEntry = self.auditLog.files[self.auditLog.files.length - 1].name;
+            if(lastEntry.match(t_log)){
+                var lastCount = lastEntry.match(t_log + "\\.(\\d+)$");
+                t_log = lastEntry;
+                fileCount = lastCount[1];
+            }
+        }
         while(f = fs.existsSync(t_log)){
             lastLogFile = t_log;
             fileCount++;
@@ -434,7 +453,12 @@ FileStreamRotator.getStream = function (options) {
                 curDate = newDate;
                 oldFile = logfile;
                 logfile = newLogfile;
-                rotateStream.destroy();
+                // Thanks to @mattberther https://github.com/mattberther for raising it again.
+                if(options.end_stream === true){
+                    rotateStream.end();
+                }else{
+                    rotateStream.destroy();
+                }
 
                 mkDirForFile(logfile);
 
@@ -444,7 +468,8 @@ FileStreamRotator.getStream = function (options) {
                 BubbleEvents(rotateStream,stream);
             }
             rotateStream.write(str, encoding);
-            curSize += str.length
+            // Handle length of double-byte characters
+            curSize += Buffer.byteLength(str, encoding);
         }).bind(this);
         process.nextTick(function(){
             stream.emit('new',logfile);

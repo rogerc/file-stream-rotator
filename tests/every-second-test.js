@@ -4,7 +4,16 @@ var moment = require('moment');
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"dont-rotate", verbose: true, date_format: "YYYY-MM-DD.HH.mm.ss"});
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"daily", verbose: true, date_format: "YYYYMMDD"});
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"daily", verbose: true});
-var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/a/logs/%DATE%/a/b/c/d/e/f/g/testlog-%DATE%.log", frequency:"custom", verbose: true, date_format: "YYYY-MM-DD.HH.mm", size:"50k", max_logs: "20", audit_file:"/tmp/audit.json"});
+var rotatingLogStream = require('../FileStreamRotator').getStream({
+    filename:"/tmp/a/logs/f/testlog-%DATE%.log", 
+    frequency:"custom", 
+    verbose: true, 
+    date_format: "YYYY-MM-DD.HH.mm", 
+    size:"50k", 
+    max_logs: "5", 
+    audit_file:"/tmp/audit.json",
+    end_stream: true
+});
 
 rotatingLogStream.on("error",function(){
     console.log(Date.now(), Date(), "stream error")
@@ -36,10 +45,22 @@ rotatingLogStream.on("new",function(newFile){
 var counter = 0;
 var i = setInterval(function(){
     counter++;
-    rotatingLogStream.write("testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890\n")
-    if(counter == 2000){
+    // rotatingLogStream.write(Date() + "\ttesting 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890\n")
+    rotatingLogStream.write(Date() + "ニューバランスの100年を超える長い歴史\n")
+    // if(counter == 2000){
+    if(counter == 200){
         clearInterval(i);
+        console.log(Date() + "\tEND STREAM");
         rotatingLogStream.end("end\n");
+        return;
     }
+
+    rotatingLogStream.write(Date() + "\t");
+    for(var y = 0; y<400; y++){
+        // console.log(i + " ")
+        // rotatingLogStream.write(y + ": " + Date.now() + " >> ");
+        rotatingLogStream.write("適: " + Date.now() + " >> ");
+    }
+    rotatingLogStream.write("\n");
 }, 10);
 

@@ -6,7 +6,7 @@ NodeJS file stream rotator
 
 ## Purpose
 
-To provide an automated rotation of Express/Connect logs or anything else that writes to a log on a regular basis that needs to be rotated based on date. It can also be rotated based on a size limit and remove old log files based on count or elapsed days. 
+To provide an automated rotation of Express/Connect logs or anything else that writes to a file on a regular basis that needs to be rotated based on date, a size limit or combination and remove old log files based on count or elapsed days. 
 
 ## Install
 
@@ -28,8 +28,10 @@ npm install file-stream-rotator
  - *max_logs*        Max number of logs to keep. If not set, it won't remove past logs. It uses its own log audit file
                      to keep track of the log files in a json format. It won't delete any file not contained in it.
                      It can be a number of files or number of days. If using days, add 'd' as the suffix.
-
  - *audit_file*      Location to store the log audit file. If not set, it will be stored in the root of the application.
+ - *end_stream*      End stream (true) instead of the destroy (default: false). Set value to true if when writing to the
+                     stream in a loop, if the application terminates or log rotates, data pending to be flushed might be lost.                    
+
 
 ## Example Usage
 ```javascript
