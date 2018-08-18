@@ -1,6 +1,7 @@
 var fsr = require('./index');
 var assert = require('assert');
 var fs = require('fs');
+var moment = require('moment');
 
 var tests = {
     testFileSizes: function () {
@@ -200,19 +201,39 @@ var tests = {
     },
     testGetStreamRotation: function() {
         var logdir = __dirname + '/log/';
+        var logfile = logdir + 'program_custom_rotation' + moment().format('YYYYMMDDHHmmss') + '.log';
+        var finalLogFile = logfile + '.' + moment().format('YYYY-MM-DD');
 
         var test = function() {
-            var options = { filename: logdir + 'program_custom_rotation.log', frequency: 'custom', verbose: true, date_format: 'YYYY-MM-DD-HH', end_stream: true, max_logs: '14d', size: '1k'};
+            var options = { filename: logfile, frequency: 'custom', verbose: true, date_format: 'YYYY-MM-DD', end_stream: true, max_logs: '14d', size: '1k'};
 
             var text = 'This is a very large text which will be more than 1k, so the file will be in '
-                     + 'need to rotate, thus we can test if the next file will be generated correctly.';;
+                     + 'need to rotate, thus we can test if the next file will be generated correctly.';
+            text = text + text + text + text + text;
 
+            fsr.getStream(options).write(text);
 
             setTimeout(function() {
                 fsr.getStream(options).write(text);
-            }, 1000);
+            }, 500);
 
-            fsr.getStream(options).write(text);
+            setTimeout(function() {
+                fsr.getStream(options).write(text);
+            }, 800);
+
+            setTimeout(function() {
+                fs.exists(finalLogFile, function(exists) {
+                    assert.ok(exists, 'File ' + finalLogFile + ' exist');
+                });
+
+                fs.exists(finalLogFile + '.1', function(exists) {
+                    assert.ok(exists, 'File ' + finalLogFile + '.1 exist');
+                });
+
+                fs.exists(finalLogFile + '.2', function(exists) {
+                    assert.ok(!exists, 'File ' + finalLogFile + '.2 DOESNT exist');
+                });
+            }, 2000);
         };
 
         fs.exists(logdir, function(exists) {
@@ -225,7 +246,7 @@ var tests = {
                     }
                     test();
                 });
-            }else{
+            } else {
                 test();
             }
         });
