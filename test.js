@@ -146,7 +146,6 @@ var tests = {
 
     },
     testGetStream: function() {
-        return;
         var logdir = __dirname + '/log/';
 
         var test = function() {
