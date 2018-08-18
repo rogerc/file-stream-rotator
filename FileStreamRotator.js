@@ -43,9 +43,9 @@ var EventEmitter = require('events');
  *                      It can be a number of files or number of days. If using days, add 'd' as the suffix.
  *
  *   - `audit_file`     Location to store the log audit file. If not set, it will be stored in the root of the application.
- * 
+ *
  *   - `end_stream`     End stream (true) instead of the default behaviour of destroy (false). Set value to true if when writing to the
- *                      stream in a loop, if the application terminates or log rotates, data pending to be flushed might be lost.                    
+ *                      stream in a loop, if the application terminates or log rotates, data pending to be flushed might be lost.
  *
  * To use with Express / Connect, use as below.
  *
@@ -393,7 +393,7 @@ FileStreamRotator.getStream = function (options) {
             if(lastEntry.match(t_log)){
                 var lastCount = lastEntry.match(t_log + "\\.(\\d+)$");
                 t_log = lastEntry;
-                fileCount = lastCount[1];
+                fileCount = lastCount ? lastCount[1] : 0;
             }
         }
         while(f = fs.existsSync(t_log)){
