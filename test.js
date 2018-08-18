@@ -146,7 +146,6 @@ var tests = {
     },
     testGetStream: function() {
         return;
-
         var logdir = __dirname + '/log/';
 
         var test = function() {
@@ -199,6 +198,38 @@ var tests = {
             }
         });
     },
+    testGetStreamRotation: function() {
+        var logdir = __dirname + '/log/';
+
+        var test = function() {
+            var options = { filename: logdir + 'program_custom_rotation.log', frequency: 'custom', verbose: true, date_format: 'YYYY-MM-DD-HH', end_stream: true, max_logs: '14d', size: '1k'};
+
+            let text = 'This is a very large text which will be more than 1k, so the file will be in '
+                     + 'need to rotate, thus we can test if the next file will be generated correctly.';;
+
+
+            setTimeout(function() {
+                fsr.getStream(options).write(text);
+            }, 1000);
+
+            fsr.getStream(options).write(text);
+        };
+
+        fs.exists(logdir, function(exists) {
+            if(!exists) {
+                console.log('Creating the log directory as one doesnt exist');
+                fs.mkdir(logdir, function(err) {
+                    if(err) {
+                        console.error('Trouble creating directory %s', logdir);
+                        throw err;
+                    }
+                    test();
+                });
+            }else{
+                test();
+            }
+        });
+    }
 }
 
 Object.keys(tests).forEach(function (test) {
