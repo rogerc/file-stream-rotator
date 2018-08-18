@@ -3,6 +3,8 @@ var assert = require('assert');
 var fs = require('fs');
 var moment = require('moment');
 
+var logdir = __dirname + '/log/';
+
 var tests = {
     testFileSizes: function () {
         [
@@ -146,114 +148,94 @@ var tests = {
 
     },
     testGetStream: function() {
-        var logdir = __dirname + '/log/';
+        var options1 = { filename: logdir + 'program1.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD' };
+        var options2 = { filename: logdir + 'program2.log', frequency: '1m', verbose: true};
+        var options3 = { filename: logdir + 'program3-%DATE%.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD'};
+        var options4 = { filename: logdir + 'program4-%DATE%.log', verbose: true, date_format: 'YYYY-MM-DD'};
+        var options5 = { filename: logdir + 'program5-%DATE%.log', verbose: true};
 
-        var test = function() {
-
-            var options1 = { filename: logdir + 'program1.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD' };
-            var options2 = { filename: logdir + 'program2.log', frequency: '1m', verbose: true};
-            var options3 = { filename: logdir + 'program3-%DATE%.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD'};
-            var options4 = { filename: logdir + 'program4-%DATE%.log', verbose: true, date_format: 'YYYY-MM-DD'};
-            var options5 = { filename: logdir + 'program5-%DATE%.log', verbose: true};
-
-            var stream1 = fsr.getStream(options1);
-            stream1.write('formatted date');
-            var stream2 = fsr.getStream(options2);
-            stream2.write('default date');
-            var stream3 = fsr.getStream(options3);
-            stream3.write('date mid filename');
-            var stream4 = fsr.getStream(options4);
-            stream4.write('date mid filename without rotation');
-            var stream5 = fsr.getStream(options5);
-            stream5.write('dafault date mid filename without rotation');
+        var stream1 = fsr.getStream(options1);
+        stream1.write('formatted date');
+        var stream2 = fsr.getStream(options2);
+        stream2.write('default date');
+        var stream3 = fsr.getStream(options3);
+        stream3.write('date mid filename');
+        var stream4 = fsr.getStream(options4);
+        stream4.write('date mid filename without rotation');
+        var stream5 = fsr.getStream(options5);
+        stream5.write('dafault date mid filename without rotation');
 
 
-            var options = { filename: logdir + 'program-%DATE%.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD:HH:mm' };
+        var options = { filename: logdir + 'program-%DATE%.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD:HH:mm' };
 
-            var stream = fsr.getStream(options);
-            process.__defineGetter__('stdout', function() { return stream;});
-            process.__defineGetter__('stderr', function() { return stream;});
+        var stream = fsr.getStream(options);
+        process.__defineGetter__('stdout', function() { return stream;});
+        process.__defineGetter__('stderr', function() { return stream;});
 
-            setTimeout(function(){
-                stream.write('Foo bar');
-            }, 3000)
+        setTimeout(function(){
+            stream.write('Foo bar');
+        }, 3000)
 
-            setTimeout(function(){
-                stream.write('Foo bar');
-            }, 60000);
-        }
-
-        fs.exists(logdir, function(exists) {
-            if(!exists) {
-                console.log('Creating the log directory as one doesnt exist');
-                fs.mkdir(logdir, function(err) {
-                    if(err) {
-                        console.error('Trouble creating directory %s', logdir);
-                        throw err;
-                    }
-                    test();
-                });
-            }else{
-                test();
-            }
-        });
+        setTimeout(function(){
+            stream.write('Foo bar');
+        }, 6000);
     },
     testGetStreamRotation: function() {
-        var logdir = __dirname + '/log/';
         var logfile = logdir + 'program_custom_rotation' + moment().format('YYYYMMDDHHmmss') + '.log';
         var finalLogFile = logfile + '.' + moment().format('YYYY-MM-DD');
 
-        var test = function() {
-            var options = { filename: logfile, frequency: 'custom', verbose: true, date_format: 'YYYY-MM-DD', end_stream: true, max_logs: '14d', size: '1k'};
+        var options = { filename: logfile, frequency: 'custom', verbose: true, date_format: 'YYYY-MM-DD', end_stream: true, max_logs: '14d', size: '1k'};
 
-            var text = 'This is a very large text which will be more than 1k, so the file will be in '
-                     + 'need to rotate, thus we can test if the next file will be generated correctly.';
-            text = text + text + text + text + text;
+        var text = 'This is a very large text which will be more than 1k, so the file will be in '
+                    + 'need to rotate, thus we can test if the next file will be generated correctly.';
+        text = text + text + text + text + text;
 
+        fsr.getStream(options).write(text);
+
+        setTimeout(function() {
             fsr.getStream(options).write(text);
+        }, 500);
 
-            setTimeout(function() {
-                fsr.getStream(options).write(text);
-            }, 500);
+        setTimeout(function() {
+            fsr.getStream(options).write(text);
+        }, 800);
 
-            setTimeout(function() {
-                fsr.getStream(options).write(text);
-            }, 800);
+        setTimeout(function() {
+            fs.exists(finalLogFile, function(exists) {
+                assert.ok(exists, 'File ' + finalLogFile + ' exist');
+            });
 
-            setTimeout(function() {
-                fs.exists(finalLogFile, function(exists) {
-                    assert.ok(exists, 'File ' + finalLogFile + ' exist');
-                });
+            fs.exists(finalLogFile + '.1', function(exists) {
+                assert.ok(exists, 'File ' + finalLogFile + '.1 exist');
+            });
 
-                fs.exists(finalLogFile + '.1', function(exists) {
-                    assert.ok(exists, 'File ' + finalLogFile + '.1 exist');
-                });
-
-                fs.exists(finalLogFile + '.2', function(exists) {
-                    assert.ok(!exists, 'File ' + finalLogFile + '.2 DOESNT exist');
-                });
-            }, 2000);
-        };
-
-        fs.exists(logdir, function(exists) {
-            if(!exists) {
-                console.log('Creating the log directory as one doesnt exist');
-                fs.mkdir(logdir, function(err) {
-                    if(err) {
-                        console.error('Trouble creating directory %s', logdir);
-                        throw err;
-                    }
-                    test();
-                });
-            } else {
-                test();
-            }
-        });
+            fs.exists(finalLogFile + '.2', function(exists) {
+                assert.ok(!exists, 'File ' + finalLogFile + '.2 DOESNT exist');
+            });
+        }, 2000);
     }
 }
 
-Object.keys(tests).forEach(function (test) {
-    if (typeof tests[test] == 'function') {
-        tests[test]();
+
+function executeTests() {
+    Object.keys(tests).forEach(function (test) {
+        if (typeof tests[test] == 'function') {
+            tests[test]();
+        }
+    });
+}
+
+fs.exists(logdir, function(exists) {
+    if(!exists) {
+        console.log('Creating the log directory as one doesnt exist');
+        fs.mkdir(logdir, function(err) {
+            if(err) {
+                console.error('Trouble creating directory %s', logdir);
+                throw err;
+            }
+            executeTests();
+        });
+    }else{
+        executeTests();
     }
 });
