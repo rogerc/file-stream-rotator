@@ -204,7 +204,7 @@ var tests = {
         var test = function() {
             var options = { filename: logdir + 'program_custom_rotation.log', frequency: 'custom', verbose: true, date_format: 'YYYY-MM-DD-HH', end_stream: true, max_logs: '14d', size: '1k'};
 
-            let text = 'This is a very large text which will be more than 1k, so the file will be in '
+            var text = 'This is a very large text which will be more than 1k, so the file will be in '
                      + 'need to rotate, thus we can test if the next file will be generated correctly.';;
 
 
