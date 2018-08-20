@@ -117,6 +117,14 @@ The npm module for this library will be maintained by:
 
 * [Roger C](http://github.com/rogerc)
 
+## Contrinutors
+
+Thanks to the contributors below for raising PRs.
+
+* @mattberther
+* @nickbug
+* @andrefarzat
+
 ## License
 
 file-stream-rotator is licensed under the MIT license.

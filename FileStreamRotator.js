@@ -392,8 +392,11 @@ FileStreamRotator.getStream = function (options) {
             var lastEntry = self.auditLog.files[self.auditLog.files.length - 1].name;
             if(lastEntry.match(t_log)){
                 var lastCount = lastEntry.match(t_log + "\\.(\\d+)$");
-                t_log = lastEntry;
-                fileCount = lastCount[1];
+                // Thanks for the PR contribution from @andrefarzat - https://github.com/andrefarzat
+                if(lastCount){                    
+                    t_log = lastEntry;
+                    fileCount = lastCount[1];
+                }
             }
         }
         while(f = fs.existsSync(t_log)){

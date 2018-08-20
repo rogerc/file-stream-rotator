@@ -1,6 +1,6 @@
 {
     "name": "file-stream-rotator",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "Automated stream rotation useful for log files",
     "main": "FileStreamRotator.js",
     "scripts": {
