@@ -119,7 +119,7 @@ The npm module for this library will be maintained by:
 
 ## Contrinutors
 
-Thanks to the contributors below for raising PRs.
+Thanks to the contributors below for raising PRs and everyone else that has raised issues to make the module better.
 
 * [Matt Berther](https://github.com/mattberther)
 * [nickbug](https://github.com/nickbug)
