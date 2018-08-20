@@ -121,9 +121,9 @@ The npm module for this library will be maintained by:
 
 Thanks to the contributors below for raising PRs.
 
-* @mattberther
-* @nickbug
-* @andrefarzat
+* [Matt Berther](https://github.com/mattberther)
+* [nickbug](https://github.com/nickbug)
+* [André Farzat](https://github.com/andrefarzat)
 
 ## License
 
