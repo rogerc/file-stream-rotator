@@ -196,17 +196,16 @@ FileStreamRotator.setAuditLog = function (max_logs, audit_file, log_file){
 
         if(Number(_num[1]) > 0) {
             var baseLog = path.dirname(log_file.replace(/%DATE%.+/,"_filename"));
-
             try{
                 if(audit_file){
                     var full_path = path.resolve(audit_file);
-                    _rtn = require(full_path);
+                    _rtn = JSON.parse(fs.readFileSync(full_path, { encoding: 'utf-8' }));
                 }else{
                     var full_path = path.resolve(baseLog + "/" + ".audit.json")
-                    _rtn = require(full_path);
+                    _rtn = JSON.parse(fs.readFileSync(full_path, { encoding: 'utf-8' }));
                 }
             }catch(e){
-                if(e.code !== "MODULE_NOT_FOUND"){
+                if(e.code !== "ENOENT"){
                     return null;
                 }
                 _rtn = {
