@@ -346,7 +346,7 @@ FileStreamRotator.getStream = function (options) {
         frequencyMetaData = self.getFrequency(options.frequency);
     }
 
-    self.auditLog = self.setAuditLog(options.max_logs, options.audit_file, options.filename);
+    let auditLog = self.setAuditLog(options.max_logs, options.audit_file, options.filename);
 
     var fileSize = null;
     var fileCount = 0;
@@ -387,8 +387,8 @@ FileStreamRotator.getStream = function (options) {
         var lastLogFile = null;
         var t_log = logfile;
         var f = null;
-        if(self.auditLog && self.auditLog.files && self.auditLog.files instanceof Array && self.auditLog.files.length > 0){
-            var lastEntry = self.auditLog.files[self.auditLog.files.length - 1].name;
+        if(auditLog && auditLog.files && auditLog.files instanceof Array && auditLog.files.length > 0){
+            var lastEntry = auditLog.files[auditLog.files.length - 1].name;
             if(lastEntry.match(t_log)){
                 var lastCount = lastEntry.match(t_log + "\\.(\\d+)$");
                 // Thanks for the PR contribution from @andrefarzat - https://github.com/andrefarzat
@@ -422,13 +422,14 @@ FileStreamRotator.getStream = function (options) {
             console.log(new Date(),"[FileStreamRotator] Rotating file: ", frequencyMetaData.type);
         }
         var stream = new EventEmitter();
+        stream.auditLog = auditLog;
         stream.end = function(){
             rotateStream.end.apply(rotateStream,arguments);
         };
         BubbleEvents(rotateStream,stream);
 
         stream.on("new",function(newLog){
-            self.auditLog = self.addLogToAudit(newLog,self.auditLog);
+            stream.auditLog = self.addLogToAudit(newLog,stream.auditLog);
 
         });
 
