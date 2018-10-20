@@ -117,7 +117,7 @@ The npm module for this library will be maintained by:
 
 * [Roger C](http://github.com/rogerc)
 
-## Contrinutors
+## Contributors
 
 Thanks to the contributors below for raising PRs and everyone else that has raised issues to make the module better.
 
