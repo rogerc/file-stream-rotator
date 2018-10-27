@@ -48,7 +48,7 @@ var EventEmitter = require('events');
  *                      stream in a loop, if the application terminates or log rotates, data pending to be flushed might be lost.                    
  *
  *   - `file_options`   An object passed to the stream. This can be used to specify flags, encoding, and mode.
- *                      See https://nodejs.org/api/all.thml#fs_fs_createwritestream_path_options. Default `{ flags: 'a' }`.
+ *                      See https://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options. Default `{ flags: 'a' }`.
  *
  * To use with Express / Connect, use as below.
  *

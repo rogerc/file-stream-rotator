@@ -30,7 +30,9 @@ npm install file-stream-rotator
                      It can be a number of files or number of days. If using days, add 'd' as the suffix.
  - *audit_file*      Location to store the log audit file. If not set, it will be stored in the root of the application.
  - *end_stream*      End stream (true) instead of the destroy (default: false). Set value to true if when writing to the
-                     stream in a loop, if the application terminates or log rotates, data pending to be flushed might be lost.                    
+                     stream in a loop, if the application terminates or log rotates, data pending to be flushed might be lost.       
+ - *file_options*    An object passed to the stream. This can be used to specify flags, encoding, and mode.
+                     See https://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options. Default `{ flags: 'a' }`.             
 
 
 ## Example Usage
@@ -124,6 +126,7 @@ Thanks to the contributors below for raising PRs and everyone else that has rais
 * [Matt Berther](https://github.com/mattberther)
 * [nickbug](https://github.com/nickbug)
 * [André Farzat](https://github.com/andrefarzat)
+* [Thibault.P](https://github.com/DrPlop)
 
 ## License
 
