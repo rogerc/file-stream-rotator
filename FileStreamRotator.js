@@ -43,9 +43,9 @@ var EventEmitter = require('events');
  *                      It can be a number of files or number of days. If using days, add 'd' as the suffix.
  *
  *   - `audit_file`     Location to store the log audit file. If not set, it will be stored in the root of the application.
- * 
+ *
  *   - `end_stream`     End stream (true) instead of the default behaviour of destroy (false). Set value to true if when writing to the
- *                      stream in a loop, if the application terminates or log rotates, data pending to be flushed might be lost.                    
+ *                      stream in a loop, if the application terminates or log rotates, data pending to be flushed might be lost.
  *
  *   - `file_options`   An object passed to the stream. This can be used to specify flags, encoding, and mode.
  *                      See https://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options. Default `{ flags: 'a' }`.
@@ -378,9 +378,10 @@ FileStreamRotator.getStream = function (options) {
 
     var filename = options.filename;
     var oldFile = null;
-    var logfile = filename + (curDate ? "." + curDate : "");
+    var logfile = filename;
     if(filename.match(/%DATE%/)){
-        logfile = filename.replace(/%DATE%/g,(curDate?curDate:self.getDate(null,dateFormat)));
+        // Remove "%DATE%" for current file
+        logfile = filename.replace(/%DATE%/g,"");
     }
     var verbose = (options.verbose !== undefined ? options.verbose : true);
     if (verbose) {
@@ -396,7 +397,7 @@ FileStreamRotator.getStream = function (options) {
             if(lastEntry.match(t_log)){
                 var lastCount = lastEntry.match(t_log + "\\.(\\d+)$");
                 // Thanks for the PR contribution from @andrefarzat - https://github.com/andrefarzat
-                if(lastCount){                    
+                if(lastCount){
                     t_log = lastEntry;
                     fileCount = lastCount[1];
                 }
@@ -441,9 +442,13 @@ FileStreamRotator.getStream = function (options) {
         stream.write = (function (str, encoding) {
             var newDate = this.getDate(frequencyMetaData,dateFormat);
             if (newDate != curDate || (fileSize && curSize > fileSize)) {
-                var newLogfile = filename + (curDate ? "." + newDate : "");
+                // Prepare the name of new file
+                var newLogfile = filename.replace(/%DATE%/g, "")
+                // Default old file name format: `${filename}.${curDate}`
+                logfile = filename + (curDate ? "." + curDate : "")
                 if(filename.match(/%DATE%/) && curDate){
-                    newLogfile = filename.replace(/%DATE%/g,newDate);
+                    // Replace "%DATE%" with current date
+                    logfile = filename.replace(/%DATE%/g, curDate);
                 }
 
                 if(fileSize && curSize > fileSize){
@@ -454,6 +459,9 @@ FileStreamRotator.getStream = function (options) {
                     fileCount = 0;
                 }
                 curSize = 0;
+    
+                // Rename current file to the name of old file
+                fs.renameSync(newLogfile, logfile);
 
                 if (verbose) {
                     console.log(new Date(),"[FileStreamRotator] Changing logs from %s to %s", logfile, newLogfile);
