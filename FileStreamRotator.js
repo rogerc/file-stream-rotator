@@ -163,20 +163,20 @@ FileStreamRotator.getDate = function (format, date_format) {
     if (format && staticFrequency.indexOf(format.type) !== -1) {
         switch (format.type) {
             case 'm':
-                var minute = Math.floor(moment().minutes() / format.digit) * format.digit;
-                return moment().minutes(minute).format(date_format);
+                var minute = Math.floor(moment().local().minutes() / format.digit) * format.digit;
+                return moment().local().minutes(minute).format(date_format);
                 break;
             case 'h':
-                var hour = Math.floor(moment().hour() / format.digit) * format.digit;
-                return moment().hour(hour).format(date_format);
+                var hour = Math.floor(moment().local().hour() / format.digit) * format.digit;
+                return moment().local().hour(hour).format(date_format);
                 break;
             case 'daily':
             case 'custom':
             case 'test':
-                return moment().format(date_format);
+                return moment().local().format(date_format);
         }
     }
-    return moment().format(date_format);
+    return moment().local().format(date_format);
 }
 
 /**
@@ -297,7 +297,7 @@ FileStreamRotator.addLogToAudit = function(logfile, audit){
         });
 
         if(audit.keep.days){
-            var oldestDate = moment().subtract(audit.keep.amount,"days").valueOf();
+            var oldestDate = moment().local().subtract(audit.keep.amount,"days").valueOf();
             var recentFiles = audit.files.filter(function(file){
                 if(file.date > oldestDate){
                     return true;
@@ -364,7 +364,7 @@ FileStreamRotator.getStream = function (options) {
         if(!options.date_format){
             dateFormat = "YYYY-MM-DD";
         }
-        if(moment().format(dateFormat) != moment().add(2,"hours").format(dateFormat) || moment().format(dateFormat) == moment().add(1,"day").format(dateFormat)){
+        if(moment().local().format(dateFormat) != moment().local().add(2,"hours").format(dateFormat) || moment().local().format(dateFormat) == moment().local().add(1,"day").format(dateFormat)){
             if(options.verbose){
                 console.log(new Date(),"[FileStreamRotator] Changing type to custom as date format changes more often than once a day or not every day");
             }
