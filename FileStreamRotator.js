@@ -117,7 +117,7 @@ var _checkDailyAndTest = function (freqType) {
  * @returns {*}
  */
 FileStreamRotator.getFrequency = function (frequency) {
-    var _f = frequency.toLowerCase().match(/^(\d+)([m|h])$/)
+    var _f = frequency.toLowerCase().match(/^(\d+)([mh])$/)
     if(_f){
         return _checkNumAndType(_f[2], parseInt(_f[1]));
     }
@@ -137,7 +137,7 @@ FileStreamRotator.getFrequency = function (frequency) {
  */
 FileStreamRotator.parseFileSize = function (size) {
     if(size && typeof size == "string"){
-        var _s = size.toLowerCase().match(/^((?:0\.)?\d+)([k|m|g])$/);
+        var _s = size.toLowerCase().match(/^((?:0\.)?\d+)([kmg])$/);
         if(_s){
             switch(_s[2]){
                 case 'k':
