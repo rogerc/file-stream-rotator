@@ -51,6 +51,9 @@ var EventEmitter = require('events');
  *                      See https://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options. Default `{ flags: 'a' }`.
  * 
  *   - `utc`            Use UTC time for date in filename. Defaults to 'FALSE'
+ * 
+ *   - `extension`      File extension to be appended to the filename. This is useful when using size restrictions as the rotation
+ *                      adds a count (1,2,3,4,...) at the end of the filename when the required size is met.
  *
  * To use with Express / Connect, use as below.
  *
@@ -298,18 +301,25 @@ function createCurrentSymLink(logfile) {
 function createLogWatcher(logfile, cb){
     if(!logfile) return null
     // console.log("Creating log watcher")
-    return fs.watch(logfile, function(event,filename){
-        // console.log(Date(), event, filename)
-        if(event == "rename"){
-            try {
-                let stats = fs.lstatSync(logfile)
-                // console.log("STATS:", stats)
-            }catch(err){
-                // console.log("ERROR:", err)
-                cb(err,logfile)
-            }                    
+    try {
+        let stats = fs.lstatSync(logfile)
+        return fs.watch(logfile, function(event,filename){
+            // console.log(Date(), event, filename)
+            if(event == "rename"){
+                try {
+                    let stats = fs.lstatSync(logfile)
+                    // console.log("STATS:", stats)
+                }catch(err){
+                    // console.log("ERROR:", err)
+                    cb(err,logfile)
+                }                    
+            }
+        })
+    }catch(err){
+        if(options.verbose){
+            console.log(new Date(),"[FileStreamRotator] Could not add watcher for " + logfile);
         }
-    })
+    }                    
 }
 
 /**
@@ -381,6 +391,7 @@ FileStreamRotator.addLogToAudit = function(logfile, audit, stream){
  * @param options.audit_file
  * @param options.file_options
  * @param options.utc
+ * @param options.extension File extension to be added at the end of the filename
  * @returns {Object} stream
  */
 FileStreamRotator.getStream = function (options) {
@@ -423,6 +434,7 @@ FileStreamRotator.getStream = function (options) {
         curDate = (options.frequency ? self.getDate(frequencyMetaData,dateFormat, options.utc) : "");
     }
 
+    options.extension = options.extension || ""
     var filename = options.filename;
     var oldFile = null;
     var logfile = filename + (curDate ? "." + curDate : "");
@@ -441,7 +453,7 @@ FileStreamRotator.getStream = function (options) {
         if(auditLog && auditLog.files && auditLog.files instanceof Array && auditLog.files.length > 0){
             var lastEntry = auditLog.files[auditLog.files.length - 1].name;
             if(lastEntry.match(t_log)){
-                var lastCount = lastEntry.match(t_log + "\\.(\\d+)$");
+                var lastCount = lastEntry.match(t_log + "\\.(\\d+)");
                 // Thanks for the PR contribution from @andrefarzat - https://github.com/andrefarzat
                 if(lastCount){                    
                     t_log = lastEntry;
@@ -449,10 +461,15 @@ FileStreamRotator.getStream = function (options) {
                 }
             }
         }
+
+        if (fileCount == 0 && t_log == logfile) {
+            t_log += options.extension
+        }
+
         while(f = fs.existsSync(t_log)){
             lastLogFile = t_log;
             fileCount++;
-            t_log = logfile + "." + fileCount;
+            t_log = logfile + "." + fileCount + options.extension;
         }
         if(lastLogFile){
             var lastLogFileStats = fs.statSync(lastLogFile);
@@ -519,10 +536,11 @@ FileStreamRotator.getStream = function (options) {
 
                 if(fileSize && curSize > fileSize){
                     fileCount++;
-                    newLogfile += "." + fileCount;
+                    newLogfile += "." + fileCount + options.extension;
                 }else{
                     // reset file count
                     fileCount = 0;
+                    newLogfile += options.extension
                 }
                 curSize = 0;
 

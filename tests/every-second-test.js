@@ -12,7 +12,9 @@ var rotatingLogStream = require('../FileStreamRotator').getStream({
     size:"50k", 
     max_logs: "5", 
     audit_file:"/tmp/audit.json",
-    end_stream: true
+    end_stream: true,
+    utc: true,
+    extension: ".logs"
 });
 
 rotatingLogStream.on("error",function(){

@@ -5,7 +5,7 @@ var moment = require('moment');
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"daily", verbose: true, date_format: "YYYYMMDD"});
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"daily", verbose: true});
 var rotatingLogStream = require('../FileStreamRotator').getStream({
-    filename: "/tmp/a/logs/1m/testlog-%DATE%.log", 
+    filename: "/tmp/a/logs/1m/testlog-%DATE%", 
     frequency: "1m", 
     verbose: true, 
     date_format: "YYYY-MM-DD.HH.mm", 
@@ -13,7 +13,8 @@ var rotatingLogStream = require('../FileStreamRotator').getStream({
     max_logs: "10",
     audit_file: "/tmp/audit.json",
     end_stream: false,
-    utc: true
+    utc: true,
+    extension: ".log"
 });
 
 rotatingLogStream.on("error", function () {

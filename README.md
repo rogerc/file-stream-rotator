@@ -34,6 +34,8 @@ npm install file-stream-rotator
  - *file_options*    An object passed to the stream. This can be used to specify flags, encoding, and mode.
                      See https://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options. Default `{ flags: 'a' }`.             
  - *utc*             Use UTC time for date in filename. Defaults to 'FALSE'
+ - *extension*       File extension to be appended to the filename. This is useful when using size restrictions as the rotation
+                     adds a count (1,2,3,4,...) at the end of the filename when the required size is met.
 
 ## Example Usage
 ```javascript
