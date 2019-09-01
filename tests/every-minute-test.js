@@ -12,7 +12,8 @@ var rotatingLogStream = require('../FileStreamRotator').getStream({
     size: "50k", 
     max_logs: "10",
     audit_file: "/tmp/audit.json",
-    end_stream: false
+    end_stream: false,
+    utc: true
 });
 
 rotatingLogStream.on("error", function () {
@@ -40,6 +41,10 @@ rotatingLogStream.on("new", function (newFile) {
     console.log(Date.now(), Date(), "stream new", newFile);
 })
 
+rotatingLogStream.on("logRemoved", function (newFile) {
+    console.log(Date.now(), Date(), "stream logRemoved", newFile);
+})
+
 // console.log(rotatingLogStream.on, rotatingLogStream.end, rotatingLogStream)
 
 
@@ -64,5 +69,9 @@ var i = setInterval(function () {
         rotatingLogStream.end("end\n");
         rotatingLogStream1.end("end\n");
     }
-}, 10);
+}, 100);
+
+// var i = setTimeout(function () {
+//     rotatingLogStream.emit("createLog")
+// }, 10000);
 
