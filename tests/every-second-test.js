@@ -50,7 +50,7 @@ var i = setInterval(function(){
     // rotatingLogStream.write(Date() + "\ttesting 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890\n")
     rotatingLogStream.write(Date() + "ニューバランスの100年を超える長い歴史\n")
     // if(counter == 2000){
-    if(counter == 200){
+    if(counter == 400){
         clearInterval(i);
         console.log(Date() + "\tEND STREAM");
         rotatingLogStream.end("end\n");

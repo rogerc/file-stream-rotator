@@ -283,22 +283,26 @@ function removeFile(file){
 function createCurrentSymLink(logfile) {
     let logPath = path.dirname(logfile)
     let current = logPath + "/current.log"
-    fs.lstat(current, function(err, stats){
-        if(err && err.code == "ENOENT") {
-            fs.symlinkSync(logfile, current)
-        }else if(stats.isSymbolicLink()){
+    try {
+        let stats = fs.lstatSync(current)
+        if(stats.isSymbolicLink()){
             fs.unlinkSync(current)
             fs.symlinkSync(logfile, current)
         }
-    })
+    } catch (err) {
+        if(err && err.code == "ENOENT") {
+            fs.symlinkSync(logfile, current)
+        }
+    }
 }
 
 /**
  * 
  * @param {String} logfile 
+ * @param {Boolean} verbose 
  * @param {function} cb 
  */
-function createLogWatcher(logfile, cb){
+function createLogWatcher(logfile, verbose, cb){
     if(!logfile) return null
     // console.log("Creating log watcher")
     try {
@@ -316,7 +320,7 @@ function createLogWatcher(logfile, cb){
             }
         })
     }catch(err){
-        if(options.verbose){
+        if(verbose){
             console.log(new Date(),"[FileStreamRotator] Could not add watcher for " + logfile);
         }
     }                    
@@ -508,7 +512,7 @@ FileStreamRotator.getStream = function (options) {
             if (logWatcher) {
                 logWatcher.close()
             }
-            logWatcher = createLogWatcher(newLog, function(err,newLog){
+            logWatcher = createLogWatcher(newLog, options.verbose, function(err,newLog){
                 stream.emit('createLog', newLog)
             })        
         })
