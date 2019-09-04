@@ -36,6 +36,8 @@ npm install file-stream-rotator
  - *utc*             Use UTC time for date in filename. Defaults to 'FALSE'
  - *extension*       File extension to be appended to the filename. This is useful when using size restrictions as the rotation
                      adds a count (1,2,3,4,...) at the end of the filename when the required size is met.
+ - *watch_log*       Watch the current file being written to and recreate it in case of accidental deletion. Defaults to 'FALSE'
+ 
 
 ## Example Usage
 ```javascript

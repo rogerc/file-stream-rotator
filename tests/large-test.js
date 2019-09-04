@@ -8,7 +8,8 @@ require('crypto').randomBytes(512, function(err, buffer) {
         size: '5k',
         max_logs: 4,
         end_stream: true,
-        verbose: true
+        verbose: true,
+        watch_log: true
     });
     
     for (var i = 0; i < 1000; i++) {

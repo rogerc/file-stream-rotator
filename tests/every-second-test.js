@@ -5,20 +5,22 @@ var moment = require('moment');
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"daily", verbose: true, date_format: "YYYYMMDD"});
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"daily", verbose: true});
 var rotatingLogStream = require('../FileStreamRotator').getStream({
-    filename:"/tmp/a/logs/f/testlog-%DATE%.log", 
+    filename:"logs/1s/testlog-%DATE%.log", 
     frequency:"custom", 
     verbose: true, 
     date_format: "YYYY-MM-DD.HH.mm", 
-    size:"50k", 
+    size:"50k",
     max_logs: "5", 
-    audit_file:"/tmp/audit.json",
-    end_stream: true,
+    audit_file:"audit-1s.json",
+    end_stream: false,
     utc: true,
-    extension: ".logs"
+    extension: ".logs",
+    watch_log: true
 });
 
-rotatingLogStream.on("error",function(){
-    console.log(Date.now(), Date(), "stream error")
+rotatingLogStream.on("error",function(err){
+    console.log(Date.now(), Date(), "stream error", err)
+    process.exit()
 })
 
 
@@ -40,6 +42,10 @@ rotatingLogStream.on("open",function(fd){
 
 rotatingLogStream.on("new",function(newFile){
     console.log(Date.now(), Date(), "stream new",newFile);
+})
+
+rotatingLogStream.on("addWatcher", function(newLog){
+    console.log(Date.now(), Date(), "stream add watcher",newLog);
 })
 
 // console.log(rotatingLogStream.on, rotatingLogStream.end, rotatingLogStream)

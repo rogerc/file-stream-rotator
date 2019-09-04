@@ -54,6 +54,8 @@ var EventEmitter = require('events');
  * 
  *   - `extension`      File extension to be appended to the filename. This is useful when using size restrictions as the rotation
  *                      adds a count (1,2,3,4,...) at the end of the filename when the required size is met.
+ * 
+ *   - `watch_log`     Watch the current file being written to and recreate it in case of accidental deletion. Defaults to 'FALSE'
  *
  * To use with Express / Connect, use as below.
  *
@@ -396,6 +398,7 @@ FileStreamRotator.addLogToAudit = function(logfile, audit, stream){
  * @param options.file_options
  * @param options.utc
  * @param options.extension File extension to be added at the end of the filename
+ * @param options.watch_log
  * @returns {Object} stream
  */
 FileStreamRotator.getStream = function (options) {
@@ -501,10 +504,19 @@ FileStreamRotator.getStream = function (options) {
         };
         BubbleEvents(rotateStream,stream);
 
+        stream.on('close', function(){
+            if (logWatcher) {
+                logWatcher.close()
+            }
+        })
+
         stream.on("new",function(newLog){
+            // console.log("new log", newLog)
             stream.auditLog = self.addLogToAudit(newLog,stream.auditLog, stream)
             createCurrentSymLink(newLog)
-            stream.emit("addWatcher", newLog)
+            if(options.watch_log){
+                stream.emit("addWatcher", newLog)
+            }
         });
         
         var logWatcher;
@@ -512,6 +524,10 @@ FileStreamRotator.getStream = function (options) {
             if (logWatcher) {
                 logWatcher.close()
             }
+            if(!options.watch_log){
+                return
+            }
+            // console.log("ADDING WATCHER", newLog)
             logWatcher = createLogWatcher(newLog, options.verbose, function(err,newLog){
                 stream.emit('createLog', newLog)
             })        
@@ -575,6 +591,7 @@ FileStreamRotator.getStream = function (options) {
         process.nextTick(function(){
             stream.emit('new',logfile);
         })
+        stream.emit('new',logfile)
         return stream;
     } else {
         if (verbose) {
