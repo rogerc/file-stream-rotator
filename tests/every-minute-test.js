@@ -9,7 +9,7 @@ var rotatingLogStream = require('../FileStreamRotator').getStream({
     frequency: "1m", 
     verbose: true, 
     date_format: "YYYY-MM-DD.HH.mm", 
-    size: "50k", 
+    size: "50m", 
     max_logs: "10",
     audit_file: "/tmp/audit.json",
     end_stream: false,
@@ -49,28 +49,28 @@ rotatingLogStream.on("logRemoved", function (newFile) {
 // console.log(rotatingLogStream.on, rotatingLogStream.end, rotatingLogStream)
 
 
-var rotatingLogStream1 = require('../FileStreamRotator').getStream({
-    filename: "/tmp/a/logs/1m-1/testlog-%DATE%.log", 
-    frequency: "1m", 
-    verbose: true, 
-    date_format: "YYYY-MM-DD.HH.mm", 
-    size: "50k", 
-    max_logs: "10",
-    audit_file: "/tmp/audit-1.json",
-    end_stream: false
-});
+// var rotatingLogStream1 = require('../FileStreamRotator').getStream({
+//     filename: "/tmp/a/logs/1m-1/testlog-%DATE%.log", 
+//     frequency: "1m", 
+//     verbose: true, 
+//     date_format: "YYYY-MM-DD.HH.mm", 
+//     size: "50k", 
+//     max_logs: "10",
+//     audit_file: "/tmp/audit-1.json",
+//     end_stream: false
+// });
 
 var counter = 0;
 var i = setInterval(function () {
     counter++;
     rotatingLogStream.write(Date() + "\t" + "testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890\n")
-    rotatingLogStream1.write(Date() + "\t" + "testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890\n")
+    // rotatingLogStream1.write(Date() + "\t" + "testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890\n")
     if (counter == 5000) {
         clearInterval(i);
         rotatingLogStream.end("end\n");
-        rotatingLogStream1.end("end\n");
+        // rotatingLogStream1.end("end\n");
     }
-}, 100);
+}, 10);
 
 // var i = setTimeout(function () {
 //     rotatingLogStream.emit("createLog")

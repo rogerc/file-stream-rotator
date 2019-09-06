@@ -284,16 +284,17 @@ function removeFile(file){
  */
 function createCurrentSymLink(logfile) {
     let logPath = path.dirname(logfile)
+    let logfileName = path.basename(logfile)
     let current = logPath + "/current.log"
     try {
         let stats = fs.lstatSync(current)
         if(stats.isSymbolicLink()){
             fs.unlinkSync(current)
-            fs.symlinkSync(logfile, current)
+            fs.symlinkSync(logfileName, current)
         }
     } catch (err) {
         if(err && err.code == "ENOENT") {
-            fs.symlinkSync(logfile, current)
+            fs.symlinkSync(logfileName, current)
         }
     }
 }
@@ -449,9 +450,6 @@ FileStreamRotator.getStream = function (options) {
         logfile = filename.replace(/%DATE%/g,(curDate?curDate:self.getDate(null,dateFormat, options.utc)));
     }
     var verbose = (options.verbose !== undefined ? options.verbose : true);
-    if (verbose) {
-        console.log(new Date(),"[FileStreamRotator] Logging to: ", logfile);
-    }
 
     if(fileSize){
         var lastLogFile = null;
@@ -487,15 +485,21 @@ FileStreamRotator.getStream = function (options) {
             }
         }
         logfile = t_log;
+    } else {
+        logfile += options.extension
+    }
+
+    if (verbose) {
+        console.log(new Date(),"[FileStreamRotator] Logging to: ", logfile);
     }
 
     mkDirForFile(logfile);
 
     var file_options = options.file_options || {flags: 'a'};
     var rotateStream = fs.createWriteStream(logfile, file_options);
-    if (curDate && frequencyMetaData && (staticFrequency.indexOf(frequencyMetaData.type) > -1)) {
+    if ((curDate && frequencyMetaData && (staticFrequency.indexOf(frequencyMetaData.type) > -1)) || fileSize > 0) {
         if (verbose) {
-            console.log(new Date(),"[FileStreamRotator] Rotating file: ", frequencyMetaData.type);
+            console.log(new Date(),"[FileStreamRotator] Rotating file: ", frequencyMetaData?frequencyMetaData.type:"", fileSize?"size: " + fileSize:"");
         }
         var stream = new EventEmitter();
         stream.auditLog = auditLog;
@@ -565,7 +569,7 @@ FileStreamRotator.getStream = function (options) {
                 curSize = 0;
 
                 if (verbose) {
-                    console.log(new Date(),"[FileStreamRotator] Changing logs from %s to %s", logfile, newLogfile);
+                    console.log(new Date(),require('util').format("[FileStreamRotator] Changing logs from %s to %s", logfile, newLogfile));
                 }
                 curDate = newDate;
                 oldFile = logfile;
@@ -595,7 +599,7 @@ FileStreamRotator.getStream = function (options) {
         return stream;
     } else {
         if (verbose) {
-            console.log(new Date(),"[FileStreamRotator] File won't be rotated: ", options.frequency, frequencyMetaData && frequencyMetaData.type);
+            console.log(new Date(),"[FileStreamRotator] File won't be rotated: ", options.frequency, options.size);
         }
         process.nextTick(function(){
             rotateStream.emit('new',logfile);
