@@ -37,6 +37,8 @@ npm install file-stream-rotator
  - *extension*       File extension to be appended to the filename. This is useful when using size restrictions as the rotation
                      adds a count (1,2,3,4,...) at the end of the filename when the required size is met.
  - *watch_log*       Watch the current file being written to and recreate it in case of accidental deletion. Defaults to 'FALSE'
+ - *create_symlink*  Create a tailable symlink to the current active log file. Defaults to 'FALSE'
+ - *symlink_name*    Name to use when creating the symbolic link. Defaults to 'current.log'
  
 
 ## Example Usage

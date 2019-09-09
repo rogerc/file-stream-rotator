@@ -55,9 +55,11 @@ var EventEmitter = require('events');
  *   - `extension`      File extension to be appended to the filename. This is useful when using size restrictions as the rotation
  *                      adds a count (1,2,3,4,...) at the end of the filename when the required size is met.
  * 
- *   - `watch_log`     Watch the current file being written to and recreate it in case of accidental deletion. Defaults to 'FALSE'
+ *   - `watch_log`      Watch the current file being written to and recreate it in case of accidental deletion. Defaults to 'FALSE'
  *
- *   - `create_symlink` Create a tailable symlink. Defaults to 'FALSE'
+ *   - `create_symlink` Create a tailable symlink to the current active log file. Defaults to 'FALSE'
+ * 
+ *   - `symlink_name`   Name to use when creating the symbolic link. Defaults to 'current.log'
  *
  * To use with Express / Connect, use as below.
  *
@@ -283,11 +285,13 @@ function removeFile(file){
 /**
  * Create symbolic link to current log file
  * @param {String} logfile 
+ * @param {String} name Name to use for symbolic link 
  */
-function createCurrentSymLink(logfile) {
+function createCurrentSymLink(logfile, name) {
+    let symLinkName = name || "current.log"
     let logPath = path.dirname(logfile)
     let logfileName = path.basename(logfile)
-    let current = logPath + "/current.log"
+    let current = logPath + "/" + symLinkName
     try {
         let stats = fs.lstatSync(current)
         if(stats.isSymbolicLink()){
@@ -402,6 +406,8 @@ FileStreamRotator.addLogToAudit = function(logfile, audit, stream){
  * @param options.utc
  * @param options.extension File extension to be added at the end of the filename
  * @param options.watch_log
+ * @param options.create_symlink
+ * @param options.symlink_name
  * @returns {Object} stream
  */
 FileStreamRotator.getStream = function (options) {
@@ -521,7 +527,7 @@ FileStreamRotator.getStream = function (options) {
             // console.log("new log", newLog)
             stream.auditLog = self.addLogToAudit(newLog,stream.auditLog, stream)
             if(options.create_symlink){
-                createCurrentSymLink(newLog)
+                createCurrentSymLink(newLog, options.symlink_name)
             }
             if(options.watch_log){
                 stream.emit("addWatcher", newLog)

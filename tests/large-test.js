@@ -10,7 +10,8 @@ require('crypto').randomBytes(1048, function(err, buffer) {
         end_stream: true,
         verbose: true,
         watch_log: true,
-        extension: ".log"
+        extension: ".log",
+        create_symlink: true
     });
     var count = 0
     var i = setInterval(function(){
@@ -20,7 +21,7 @@ require('crypto').randomBytes(1048, function(err, buffer) {
         }
         count++;
         for (var i = 0; i < 1; i++) {
-            logStream.write(token + os.eol);
+            logStream.write(token + "\n");
         }
     },10)
 
