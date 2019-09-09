@@ -57,6 +57,8 @@ var EventEmitter = require('events');
  * 
  *   - `watch_log`     Watch the current file being written to and recreate it in case of accidental deletion. Defaults to 'FALSE'
  *
+ *   - `create_symlink` Create a tailable symlink. Defaults to 'FALSE'
+ *
  * To use with Express / Connect, use as below.
  *
  * var rotatingLogStream = require('FileStreamRotator').getStream({filename:"/tmp/test.log", frequency:"daily", verbose: false})
@@ -442,6 +444,7 @@ FileStreamRotator.getStream = function (options) {
         curDate = (options.frequency ? self.getDate(frequencyMetaData,dateFormat, options.utc) : "");
     }
 
+    options.create_symlink = options.create_symlink || false;
     options.extension = options.extension || ""
     var filename = options.filename;
     var oldFile = null;
@@ -517,7 +520,9 @@ FileStreamRotator.getStream = function (options) {
         stream.on("new",function(newLog){
             // console.log("new log", newLog)
             stream.auditLog = self.addLogToAudit(newLog,stream.auditLog, stream)
-            createCurrentSymLink(newLog)
+            if(options.create_symlink){
+                createCurrentSymLink(newLog)
+            }
             if(options.watch_log){
                 stream.emit("addWatcher", newLog)
             }
