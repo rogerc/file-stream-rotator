@@ -562,7 +562,10 @@ FileStreamRotator.getStream = function (options) {
 
 
         stream.write = (function (str, encoding) {
-            var newDate = this.getDate(frequencyMetaData, dateFormat, options.utc);
+            var newDate = "";
+            if (frequencyMetaData) {
+                newDate = (options.frequency ? this.getDate(frequencyMetaData,dateFormat, options.utc) : "");
+            }
             if (newDate != curDate || (fileSize && curSize > fileSize)) {
                 var newLogfile = filename + (curDate ? "." + newDate : "");
                 if(filename.match(/%DATE%/) && curDate){
