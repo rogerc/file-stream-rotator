@@ -26,5 +26,8 @@
     "license": "MIT",
     "dependencies": {
         "moment": "^2.11.2"
+    },
+    "devDependencies": {
+        "benchmark": "^2.1.4"
     }
 }
