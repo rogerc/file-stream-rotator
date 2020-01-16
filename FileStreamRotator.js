@@ -300,7 +300,10 @@ function createCurrentSymLink(logfile, name) {
         }
     } catch (err) {
         if(err && err.code == "ENOENT") {
-            fs.symlinkSync(logfileName, current)
+            try {
+                fs.symlinkSync(logfileName, current)
+            } catch(_err) {
+            }
         }
     }
 }
