@@ -300,7 +300,12 @@ function createCurrentSymLink(logfile, name) {
         }
     } catch (err) {
         if(err && err.code == "ENOENT") {
-            fs.symlinkSync(logfileName, current)
+            try {
+                fs.symlinkSync(logfileName, current)
+            }
+            catch (e) {
+                console.error(new Date(), "[FileStreamRotator] Could not create symlink file: ", current, ' -> ', logfileName);
+            }
         }
     }
 }
