@@ -252,13 +252,14 @@ FileStreamRotator.setAuditLog = function (max_logs, audit_file, log_file){
  * @param {Number} audit.keep.amount
  * @param {String} audit.auditLog
  * @param {Array} audit.files
+ * @param {Boolean} verbose 
  */
-FileStreamRotator.writeAuditLog = function(audit){
+FileStreamRotator.writeAuditLog = function(audit, verbose){
     try{
         mkDirForFile(audit.auditLog);
         fs.writeFileSync(audit.auditLog, JSON.stringify(audit,null,4));
     }catch(e){
-        if (self.verbose) {
+        if (verbose) {
             console.error(new Date(),"[FileStreamRotator] Failed to store log audit at:", audit.auditLog,"Error:", e);
         }
     }
@@ -271,6 +272,7 @@ FileStreamRotator.writeAuditLog = function(audit){
  * @param file.hash
  * @param file.name
  * @param file.date
+ * @param {Boolean} verbose 
  */
 function removeFile(file, verbose){
     if(file.hash === crypto.createHash('md5').update(file.name + "LOG_FILE" + file.date).digest("hex")){
@@ -290,6 +292,7 @@ function removeFile(file, verbose){
  * Create symbolic link to current log file
  * @param {String} logfile 
  * @param {String} name Name to use for symbolic link 
+ * @param {Boolean} verbose 
  */
 function createCurrentSymLink(logfile, name, verbose) {
     let symLinkName = name || "current.log"
@@ -355,8 +358,9 @@ function createLogWatcher(logfile, verbose, cb){
  * @param {String} audit.auditLog
  * @param {Array} audit.files
  * @param {EventEmitter} stream
+ * @param {Boolean} verbose 
  */
-FileStreamRotator.addLogToAudit = function(logfile, audit, stream){
+FileStreamRotator.addLogToAudit = function(logfile, audit, stream, verbose){
     if(audit && audit.files){
         // Based on contribution by @nickbug - https://github.com/nickbug
         var index = audit.files.findIndex(function(file) {
@@ -379,7 +383,7 @@ FileStreamRotator.addLogToAudit = function(logfile, audit, stream){
                 if(file.date > oldestDate){
                     return true;
                 }
-                removeFile(file, self.verbose);
+                removeFile(file, verbose);
                 stream.emit("logRemoved", file)
                 return false;
             });
@@ -388,7 +392,7 @@ FileStreamRotator.addLogToAudit = function(logfile, audit, stream){
             var filesToKeep = audit.files.splice(-audit.keep.amount);
             if(audit.files.length > 0){
                 audit.files.filter(function(file){
-                    removeFile(file, self.verbose);
+                    removeFile(file, verbose);
                     stream.emit("logRemoved", file)
                     return false;
                 })
@@ -396,7 +400,7 @@ FileStreamRotator.addLogToAudit = function(logfile, audit, stream){
             audit.files = filesToKeep;
         }
 
-        FileStreamRotator.writeAuditLog(audit);
+        FileStreamRotator.writeAuditLog(audit, verbose);
     }
 
     return audit;
@@ -535,7 +539,7 @@ FileStreamRotator.getStream = function (options) {
 
         stream.on("new",function(newLog){
             // console.log("new log", newLog)
-            stream.auditLog = self.addLogToAudit(newLog,stream.auditLog, stream)
+            stream.auditLog = self.addLogToAudit(newLog,stream.auditLog, stream, self.verbose)
             if(options.create_symlink){
                 createCurrentSymLink(newLog, options.symlink_name, self.verbose)
             }
