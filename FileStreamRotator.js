@@ -480,8 +480,8 @@ FileStreamRotator.getStream = function (options) {
         var f = null;
         if(auditLog && auditLog.files && auditLog.files instanceof Array && auditLog.files.length > 0){
             var lastEntry = auditLog.files[auditLog.files.length - 1].name;
-            var  lastEntryWithoutPath = lastEntry.split("\\").pop();
-            var  t_logWithoutPath = t_log.split("\\").pop();
+            var lastEntryWithoutPath = lastEntry.split("\\").pop();
+            var t_logWithoutPath = t_log.split("\\").pop();
             if(lastEntryWithoutPath.match(t_logWithoutPath)){
                 var lastCount = lastEntryWithoutPath.match(t_logWithoutPath + "\\.(\\d+)");
                 // Thanks for the PR contribution from @andrefarzat - https://github.com/andrefarzat
