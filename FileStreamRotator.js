@@ -613,7 +613,10 @@ FileStreamRotator.getStream = function (options) {
                 stream.emit('rotate',oldFile, newLogfile);
                 BubbleEvents(rotateStream,stream);
             }
-            rotateStream.write(str, encoding);
+            // should not write when rotateStream has been destroyed, avoiding this case: https://github.com/winstonjs/winston-daily-rotate-file/issues/226
+            if(!rotateStream.destroyed) {
+              rotateStream.write(str, encoding);
+            }
             // Handle length of double-byte characters
             curSize += Buffer.byteLength(str, encoding);
         }).bind(this);
