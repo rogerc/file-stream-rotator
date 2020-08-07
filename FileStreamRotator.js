@@ -576,6 +576,9 @@ FileStreamRotator.getStream = function (options) {
 
 
         stream.write = (function (str, encoding) {
+            rotateStream.write(str, encoding);
+            // Handle length of double-byte characters
+            curSize += Buffer.byteLength(str, encoding);
             var newDate = this.getDate(frequencyMetaData, dateFormat, options.utc);
             if (newDate != curDate || (fileSize && curSize > fileSize)) {
                 var newLogfile = filename + (curDate ? "." + newDate : "");
@@ -613,9 +616,6 @@ FileStreamRotator.getStream = function (options) {
                 stream.emit('rotate',oldFile, newLogfile);
                 BubbleEvents(rotateStream,stream);
             }
-            rotateStream.write(str, encoding);
-            // Handle length of double-byte characters
-            curSize += Buffer.byteLength(str, encoding);
         }).bind(this);
         process.nextTick(function(){
             stream.emit('new',logfile);
