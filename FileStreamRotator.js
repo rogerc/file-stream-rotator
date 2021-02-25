@@ -61,6 +61,8 @@ var EventEmitter = require('events');
  * 
  *   - `symlink_name`   Name to use when creating the symbolic link. Defaults to 'current.log'
  *
+ *   - `append_date`    Append Date string to log filename. Defaults to 'TRUE'
+ *
  * To use with Express / Connect, use as below.
  *
  * var rotatingLogStream = require('FileStreamRotator').getStream({filename:"/tmp/test.log", frequency:"daily", verbose: false})
@@ -422,6 +424,7 @@ FileStreamRotator.addLogToAudit = function(logfile, audit, stream, verbose){
  * @param options.watch_log
  * @param options.create_symlink
  * @param options.symlink_name
+ * @param options.append_date
  * @returns {Object} stream
  */
 FileStreamRotator.getStream = function (options) {
@@ -448,6 +451,8 @@ FileStreamRotator.getStream = function (options) {
         fileSize = FileStreamRotator.parseFileSize(options.size);
     }
 
+    var appendDate = (options.append_date !== undefined ? options.append_date : true);
+
     var dateFormat = (options.date_format || DATE_FORMAT);
     if(frequencyMetaData && frequencyMetaData.type == "daily"){
         if(!options.date_format){
@@ -469,12 +474,14 @@ FileStreamRotator.getStream = function (options) {
     options.extension = options.extension || ""
     var filename = options.filename;
     var oldFile = null;
-    var logfile = filename + (curDate ? "." + curDate : "");
+    var logfile = filename + ((appendDate && curDate) ? "." + curDate : "");
     if(filename.match(/%DATE%/)){
         logfile = filename.replace(/%DATE%/g,(curDate?curDate:self.getDate(null,dateFormat, options.utc)));
     }
+    // baseFile is logfile without filecount and options.extension
+    var baseFile = logfile;
 
-    if(fileSize){
+    if(fileSize || !appendDate){
         var lastLogFile = null;
         var t_log = logfile;
         var f = null;
@@ -501,7 +508,7 @@ FileStreamRotator.getStream = function (options) {
         }
         if(lastLogFile){
             var lastLogFileStats = fs.statSync(lastLogFile);
-            if(lastLogFileStats.size < fileSize){
+            if(!appendDate || lastLogFileStats.size < fileSize){
                 t_log = lastLogFile;
                 fileCount--;
                 curSize = lastLogFileStats.size;
@@ -578,18 +585,20 @@ FileStreamRotator.getStream = function (options) {
         stream.write = (function (str, encoding) {
             var newDate = this.getDate(frequencyMetaData, dateFormat, options.utc);
             if (newDate != curDate || (fileSize && curSize > fileSize)) {
-                var newLogfile = filename + (curDate ? "." + newDate : "");
+                var newBasefile = filename + ((appendDate && curDate) ? "." + newDate : "");
+                var newLogfile;
+
                 if(filename.match(/%DATE%/) && curDate){
-                    newLogfile = filename.replace(/%DATE%/g,newDate);
+                    newBasefile = filename.replace(/%DATE%/g,newDate);
                 }
 
-                if(fileSize && curSize > fileSize){
+                if(baseFile === newBasefile){
                     fileCount++;
-                    newLogfile += "." + fileCount + options.extension;
+                    newLogfile = newBasefile + "." + fileCount + options.extension;
                 }else{
                     // reset file count
                     fileCount = 0;
-                    newLogfile += options.extension
+                    newLogfile = newBasefile + options.extension;
                 }
                 curSize = 0;
 
@@ -597,6 +606,7 @@ FileStreamRotator.getStream = function (options) {
                     console.log(new Date(),require('util').format("[FileStreamRotator] Changing logs from %s to %s", logfile, newLogfile));
                 }
                 curDate = newDate;
+                baseFile = newBasefile;
                 oldFile = logfile;
                 logfile = newLogfile;
                 // Thanks to @mattberther https://github.com/mattberther for raising it again.
