@@ -3,6 +3,7 @@
     "version": "0.5.7",
     "description": "Automated stream rotation useful for log files",
     "main": "FileStreamRotator.js",
+    "types": "FileStreamRotator.d.ts",
     "scripts": {
         "test": "node test.js"
     },
