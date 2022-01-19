@@ -4,6 +4,9 @@ var moment = require('moment');
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"dont-rotate", verbose: true, date_format: "YYYY-MM-DD.HH.mm.ss"});
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"daily", verbose: true, date_format: "YYYYMMDD"});
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"daily", verbose: true});
+
+const symLinkName = "tail.log"
+
 var rotatingLogStream = require('../FileStreamRotator').getStream({
     filename: "logs/1m/testlog-%DATE%", 
     frequency: "1m", 
@@ -16,7 +19,8 @@ var rotatingLogStream = require('../FileStreamRotator').getStream({
     utc: true,
     extension: ".log",
     create_symlink: true,
-    symlink_name: "tail.log"
+    // symlink_name: "tail.log"
+    symlink_name: symLinkName
 });
 
 rotatingLogStream.on("error", function () {
