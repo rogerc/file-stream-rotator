@@ -60,6 +60,8 @@ var EventEmitter = require('events');
  *   - `create_symlink` Create a tailable symlink to the current active log file. Defaults to 'FALSE'
  * 
  *   - `symlink_name`   Name to use when creating the symbolic link. Defaults to 'current.log'
+ * 
+ *   - `audit_hash_type` Use specified hashing algorithm for audit. Defaults to 'md5'. Use 'sha256' for FIPS compliance.
  *
  * To use with Express / Connect, use as below.
  *
@@ -203,6 +205,7 @@ FileStreamRotator.getDate = function (format, date_format, utc) {
  * @property {Number} auditLogSettings.keep.amount
  * @property {String} auditLogSettings.auditLog
  * @property {Array} auditLogSettings.files
+ * @property {String} auditLogSettings.hashType
  */
 FileStreamRotator.setAuditLog = function (max_logs, audit_file, log_file){
     var _rtn = null;
@@ -252,6 +255,7 @@ FileStreamRotator.setAuditLog = function (max_logs, audit_file, log_file){
  * @param {Number} audit.keep.amount
  * @param {String} audit.auditLog
  * @param {Array} audit.files
+ * @param {String} audit.hashType
  * @param {Boolean} verbose 
  */
 FileStreamRotator.writeAuditLog = function(audit, verbose){
@@ -272,10 +276,11 @@ FileStreamRotator.writeAuditLog = function(audit, verbose){
  * @param file.hash
  * @param file.name
  * @param file.date
+ * @param file.hashType
  * @param {Boolean} verbose 
  */
 function removeFile(file, verbose){
-    if(file.hash === crypto.createHash('md5').update(file.name + "LOG_FILE" + file.date).digest("hex")){
+    if(file.hash === crypto.createHash(file.hashType).update(file.name + "LOG_FILE" + file.date).digest("hex")){
         try{
             if (fs.existsSync(file.name)) {
                 fs.unlinkSync(file.name);
@@ -356,6 +361,7 @@ function createLogWatcher(logfile, verbose, cb){
  * @param {Boolean} audit.keep.days
  * @param {Number} audit.keep.amount
  * @param {String} audit.auditLog
+ * @param {String} audit.hashType
  * @param {Array} audit.files
  * @param {EventEmitter} stream
  * @param {Boolean} verbose 
@@ -374,7 +380,7 @@ FileStreamRotator.addLogToAudit = function(logfile, audit, stream, verbose){
         audit.files.push({
             date: time,
             name: logfile,
-            hash: crypto.createHash('md5').update(logfile + "LOG_FILE" + time).digest("hex")
+            hash: crypto.createHash(audit.hashType).update(logfile + "LOG_FILE" + time).digest("hex")
         });
 
         if(audit.keep.days){
@@ -383,6 +389,7 @@ FileStreamRotator.addLogToAudit = function(logfile, audit, stream, verbose){
                 if(file.date > oldestDate){
                     return true;
                 }
+                file.hashType = audit.hashType
                 removeFile(file, verbose);
                 stream.emit("logRemoved", file)
                 return false;
@@ -392,6 +399,7 @@ FileStreamRotator.addLogToAudit = function(logfile, audit, stream, verbose){
             var filesToKeep = audit.files.splice(-audit.keep.amount);
             if(audit.files.length > 0){
                 audit.files.filter(function(file){
+                    file.hashType = audit.hashType
                     removeFile(file, verbose);
                     stream.emit("logRemoved", file)
                     return false;
@@ -422,6 +430,7 @@ FileStreamRotator.addLogToAudit = function(logfile, audit, stream, verbose){
  * @param options.watch_log
  * @param options.create_symlink
  * @param options.symlink_name
+ * @param options.audit_hash_type Hash to be used to add to the audit log (md5, sha256)
  * @returns {Object} stream
  */
 FileStreamRotator.getStream = function (options) {
@@ -439,6 +448,7 @@ FileStreamRotator.getStream = function (options) {
     }
 
     let auditLog = self.setAuditLog(options.max_logs, options.audit_file, options.filename);
+    auditLog.hashType = (options.audit_hash_type !== undefined ? options.audit_hash_type : 'md5');
     self.verbose = (options.verbose !== undefined ? options.verbose : true);
 
     var fileSize = null;

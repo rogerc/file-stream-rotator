@@ -15,7 +15,8 @@ var rotatingLogStream = require('../FileStreamRotator').getStream({
     end_stream: false,
     utc: true,
     extension: ".logs",
-    watch_log: true
+    watch_log: true,
+    audit_hash_type: 'sha256'
 });
 
 rotatingLogStream.on("error",function(err){

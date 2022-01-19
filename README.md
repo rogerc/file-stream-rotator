@@ -39,6 +39,7 @@ npm install file-stream-rotator
  - *watch_log*       Watch the current file being written to and recreate it in case of accidental deletion. Defaults to 'FALSE'
  - *create_symlink*  Create a tailable symlink to the current active log file. Defaults to 'FALSE'
  - *symlink_name*    Name to use when creating the symbolic link. Defaults to 'current.log'
+ - *audit_hash_type* Use specified hashing algorithm for audit. Defaults to 'md5'. Use 'sha256' for FIPS compliance.
  
 
 ## Example Usage
