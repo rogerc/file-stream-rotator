@@ -661,7 +661,13 @@ var mkDirForFile = function(pathWithFile){
             //     console.log("STATS ERROR",e)
             // }
             if (!fs.existsSync(fullPath)) {
-                fs.mkdirSync(fullPath);
+                try{
+                    fs.mkdirSync(fullPath);
+                }catch(e){
+                    if(e.code !== 'EEXIST'){
+                        throw e;
+                    }
+                }
             }
             return fullPath;
         },
