@@ -580,6 +580,7 @@ FileStreamRotator.getStream = function (options) {
                     rotateStream.end();
                 }
                 rotateStream = fs.createWriteStream(file, file_options);
+                stream.emit('new',file);
                 BubbleEvents(rotateStream,stream);
             }
         });
