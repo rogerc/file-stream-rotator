@@ -77,6 +77,13 @@ npm install file-stream-rotator
     // Rotate on the hour or any specified number of hours and keep 10 days and store the audit file in /tmp/log-audit.json
     var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"1h", verbose: false, max_logs: "10d", audit_file: "/tmp/log-audit.json"});
 
+    // Rotate by file size only without date included in the name. Iteration will be added at the end.
+    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/logfile", size:"50k", max_logs: "5", audit_file:"/tmp/logaudit.json"});
+
+    // Rotate by file size only without date included in the name. Rotation added before the extension.
+    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/logfile", size:"50k", max_logs: "5", audit_file:"/tmp/logaudit.json". extension: ".log"});
+
+
     //.....    
     
     // Use new stream in express

@@ -12,13 +12,14 @@ var rotatingLogStream = require('../FileStreamRotator').getStream({
     frequency: "1m", 
     verbose: true, 
     date_format: "YYYY-MM-DD.HH.mm", 
-    size: "500k", 
+    size: "100k", 
     max_logs: "10",
     audit_file: "/tmp/audit.json",
     end_stream: false,
     utc: true,
     extension: ".log",
     create_symlink: true,
+    watch_log: true,
     // symlink_name: "tail.log"
     symlink_name: symLinkName
 });
