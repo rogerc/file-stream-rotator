@@ -43,24 +43,24 @@ var EventEmitter = require('events');
  *                      It can be a number of files or number of days. If using days, add 'd' as the suffix.
  *
  *   - `audit_file`     Location to store the log audit file. If not set, it will be stored in the root of the application.
- * 
+ *
  *   - `end_stream`     End stream (true) instead of the default behaviour of destroy (false). Set value to true if when writing to the
- *                      stream in a loop, if the application terminates or log rotates, data pending to be flushed might be lost.                    
+ *                      stream in a loop, if the application terminates or log rotates, data pending to be flushed might be lost.
  *
  *   - `file_options`   An object passed to the stream. This can be used to specify flags, encoding, and mode.
  *                      See https://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options. Default `{ flags: 'a' }`.
- * 
+ *
  *   - `utc`            Use UTC time for date in filename. Defaults to 'FALSE'
- * 
+ *
  *   - `extension`      File extension to be appended to the filename. This is useful when using size restrictions as the rotation
  *                      adds a count (1,2,3,4,...) at the end of the filename when the required size is met.
- * 
+ *
  *   - `watch_log`      Watch the current file being written to and recreate it in case of accidental deletion. Defaults to 'FALSE'
  *
  *   - `create_symlink` Create a tailable symlink to the current active log file. Defaults to 'FALSE'
- * 
+ *
  *   - `symlink_name`   Name to use when creating the symbolic link. Defaults to 'current.log'
- * 
+ *
  *   - `audit_hash_type` Use specified hashing algorithm for audit. Defaults to 'md5'. Use 'sha256' for FIPS compliance.
  *
  * To use with Express / Connect, use as below.
@@ -256,7 +256,7 @@ FileStreamRotator.setAuditLog = function (max_logs, audit_file, log_file){
  * @param {String} audit.auditLog
  * @param {Array} audit.files
  * @param {String} audit.hashType
- * @param {Boolean} verbose 
+ * @param {Boolean} verbose
  */
 FileStreamRotator.writeAuditLog = function(audit, verbose){
     try{
@@ -277,7 +277,7 @@ FileStreamRotator.writeAuditLog = function(audit, verbose){
  * @param file.name
  * @param file.date
  * @param file.hashType
- * @param {Boolean} verbose 
+ * @param {Boolean} verbose
  */
 function removeFile(file, verbose){
     if(file.hash === crypto.createHash(file.hashType).update(file.name + "LOG_FILE" + file.date).digest("hex")){
@@ -295,9 +295,9 @@ function removeFile(file, verbose){
 
 /**
  * Create symbolic link to current log file
- * @param {String} logfile 
- * @param {String} name Name to use for symbolic link 
- * @param {Boolean} verbose 
+ * @param {String} logfile
+ * @param {String} name Name to use for symbolic link
+ * @param {Boolean} verbose
  */
 function createCurrentSymLink(logfile, name, verbose) {
     let symLinkName = name || "current.log"
@@ -324,10 +324,10 @@ function createCurrentSymLink(logfile, name, verbose) {
 }
 
 /**
- * 
- * @param {String} logfile 
- * @param {Boolean} verbose 
- * @param {function} cb 
+ *
+ * @param {String} logfile
+ * @param {Boolean} verbose
+ * @param {function} cb
  */
 function createLogWatcher(logfile, verbose, cb){
     if(!logfile) return null
@@ -343,14 +343,14 @@ function createLogWatcher(logfile, verbose, cb){
                 }catch(err){
                     // console.log("ERROR:", err)
                     cb(err,logfile)
-                }                    
+                }
             }
         })
     }catch(err){
         if(verbose){
             console.log(new Date(),"[FileStreamRotator] Could not add watcher for " + logfile);
         }
-    }                    
+    }
 }
 
 /**
@@ -364,7 +364,7 @@ function createLogWatcher(logfile, verbose, cb){
  * @param {String} audit.hashType
  * @param {Array} audit.files
  * @param {EventEmitter} stream
- * @param {Boolean} verbose 
+ * @param {Boolean} verbose
  */
 FileStreamRotator.addLogToAudit = function(logfile, audit, stream, verbose){
     if(audit && audit.files){
@@ -448,7 +448,9 @@ FileStreamRotator.getStream = function (options) {
     }
 
     let auditLog = self.setAuditLog(options.max_logs, options.audit_file, options.filename);
-    auditLog.hashType = (options.audit_hash_type !== undefined ? options.audit_hash_type : 'md5');
+    if (auditLog) {
+      auditLog.hashType = (options.audit_hash_type !== undefined ? options.audit_hash_type : 'md5');
+    }
     self.verbose = (options.verbose !== undefined ? options.verbose : true);
 
     var fileSize = null;
@@ -493,7 +495,7 @@ FileStreamRotator.getStream = function (options) {
             if(lastEntry.match(t_log)){
                 var lastCount = lastEntry.match(t_log + "\\.(\\d+)");
                 // Thanks for the PR contribution from @andrefarzat - https://github.com/andrefarzat
-                if(lastCount){                    
+                if(lastCount){
                     t_log = lastEntry;
                     fileCount = lastCount[1];
                 }
@@ -557,7 +559,7 @@ FileStreamRotator.getStream = function (options) {
                 stream.emit("addWatcher", newLog)
             }
         });
-        
+
         var logWatcher;
         stream.on("addWatcher", function(newLog){
             if (logWatcher) {
@@ -569,7 +571,7 @@ FileStreamRotator.getStream = function (options) {
             // console.log("ADDING WATCHER", newLog)
             logWatcher = createLogWatcher(newLog, self.verbose, function(err,newLog){
                 stream.emit('createLog', newLog)
-            })        
+            })
         })
 
         stream.on("createLog",function(file){

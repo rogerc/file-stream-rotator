@@ -145,12 +145,10 @@ var tests = {
 
     },
     testGetStream: function() {
-        return;
-
         var logdir = __dirname + '/log/';
 
         var test = function() {
-
+            console.log('test!!!')
             var options1 = { filename: logdir + 'program1.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD' };
             var options2 = { filename: logdir + 'program2.log', frequency: '1m', verbose: true};
             var options3 = { filename: logdir + 'program3-%DATE%.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD'};
