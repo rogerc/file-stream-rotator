@@ -39,7 +39,7 @@ var rotatingLogStream = require('../FileStreamRotator').getStream({
     filename:"logs/nodate/logfile", 
     verbose: true, 
     size:"50k",
-    max_logs: "5", 
+    // max_logs: "5", 
     audit_file:"audit-nodate.json",
     end_stream: false,
     extension: ".log"

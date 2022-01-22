@@ -448,7 +448,10 @@ FileStreamRotator.getStream = function (options) {
     }
 
     let auditLog = self.setAuditLog(options.max_logs, options.audit_file, options.filename);
-    auditLog.hashType = (options.audit_hash_type !== undefined ? options.audit_hash_type : 'md5');
+    // Thanks to Means88 for PR.
+    if (auditLog != null) {
+        auditLog.hashType = (options.audit_hash_type !== undefined ? options.audit_hash_type : 'md5');
+    }
     self.verbose = (options.verbose !== undefined ? options.verbose : true);
 
     var fileSize = null;
