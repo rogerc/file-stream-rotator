@@ -634,7 +634,6 @@ FileStreamRotator.getStream = function (options) {
         process.nextTick(function(){
             stream.emit('new',logfile);
         })
-        stream.emit('new',logfile)
         return stream;
     } else {
         if (self.verbose) {
