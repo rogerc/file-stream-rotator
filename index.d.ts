@@ -1,4 +1,4 @@
-import { WriteStream, WriteFileOptions } from "fs";
+import type { WriteStream, WriteFileOptions } from "fs";
 
 export type StreamOptions = {
     filename: string;
