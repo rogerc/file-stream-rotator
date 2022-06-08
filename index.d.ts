@@ -6,6 +6,7 @@ export type StreamOptions = {
     verbose?: boolean;
     date_format?: string;
     size?: string;
+    max_logs?: number | `${number}d`;
     audit_file?: string;
     end_stream?: boolean;
     file_options?: WriteFileOptions;
