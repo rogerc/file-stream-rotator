@@ -156,6 +156,7 @@ var tests = {
             var options3 = { filename: logdir + 'program3-%DATE%.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD'};
             var options4 = { filename: logdir + 'program4-%DATE%.log', verbose: true, date_format: 'YYYY-MM-DD'};
             var options5 = { filename: logdir + 'program5-%DATE%.log', verbose: true};
+            var options6 = { filename: logdir + '/special-characters-test-logs))/program.log', verbose: true, size: '1m', max_logs: 20};
 
             var stream1 = fsr.getStream(options1);
             stream1.write('formatted date');
@@ -166,7 +167,14 @@ var tests = {
             var stream4 = fsr.getStream(options4);
             stream4.write('date mid filename without rotation');
             var stream5 = fsr.getStream(options5);
-            stream5.write('dafault date mid filename without rotation');
+            stream5.write('default date mid filename without rotation');
+
+
+            // Get stream twice to test how it behaves when the audit file already exists
+            var stream6a = fsr.getStream(options6);
+            stream6a.write('special characters in a filename path A');
+            var stream6b = fsr.getStream(options6);
+            stream6b.write('special characters in a filename path B');
 
 
             var options = { filename: logdir + 'program-%DATE%.log', frequency: '1m', verbose: true, date_format: 'YYYY-MM-DD:HH:mm' };

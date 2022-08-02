@@ -123,6 +123,16 @@ var _checkDailyAndTest = function (freqType) {
     return false;
 }
 
+/**
+ * Sanitizes regular expression string
+ * @param {string} regExpString
+ * @returns {string}
+ * @private
+ */
+ var _escapeRegexp = function (regExpString) {
+    return regExpString.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
 
 /**
  * Returns frequency metadata
@@ -493,8 +503,8 @@ FileStreamRotator.getStream = function (options) {
         var f = null;
         if(auditLog && auditLog.files && auditLog.files instanceof Array && auditLog.files.length > 0){
             var lastEntry = auditLog.files[auditLog.files.length - 1].name;
-            if(lastEntry.match(t_log)){
-                var lastCount = lastEntry.match(t_log + "\\.(\\d+)");
+            if(lastEntry.match(_escapeRegexp(t_log))){
+                var lastCount = lastEntry.match(_escapeRegexp(t_log) + "\\.(\\d+)");
                 // Thanks for the PR contribution from @andrefarzat - https://github.com/andrefarzat
                 if(lastCount){                    
                     t_log = lastEntry;
