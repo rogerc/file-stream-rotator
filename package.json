@@ -1,10 +1,13 @@
 {
     "name": "file-stream-rotator",
-    "version": "0.6.1",
+    "version": "1.0.0",
     "description": "Automated stream rotation useful for log files",
-    "main": "FileStreamRotator.js",
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts",
+    "type": "commonjs",
     "scripts": {
-        "test": "node test.js"
+        "test": "cd tests && node test.js",
+        "build": "tsc"
     },
     "repository": {
         "type": "git",
@@ -24,7 +27,9 @@
     ],
     "author": "Roger Castells",
     "license": "MIT",
-    "dependencies": {
-        "moment": "^2.29.1"
+    "dependencies": {},
+    "devDependencies": {
+        "@types/node": "^18.11.3",
+        "typescript": "^4.8.4"
     }
 }

@@ -14,82 +14,102 @@ To provide an automated rotation of Express/Connect logs or anything else that w
 npm install file-stream-rotator
 ```
 
+**IMPORTANT NOTE**
+Since version 1, *moment.js* is not used anymore. The external dependencies have been removed. The date substitutions are done internally and only using numerical values for year, month, day, hour, minute, second. AM/PM is the only text replacement.
+
+Frequency options have changed too.
+
 ## Options
 
  - *filename*:       Filename including full path used by the stream
- - *frequency*:      How often to rotate. Options are 'daily', 'custom' and 'test'. 'test' rotates every minute.
-                     If frequency is set to none of the above, a YYYYMMDD string will be added to the end of the filename.
- - *verbose*:        If set, it will log to STDOUT when it rotates files and name of log file. Default is TRUE.
- - *date_format*:    Format as used in moment.js http://momentjs.com/docs/#/displaying/format/. The result is used to replace
-                     the '%DATE%' placeholder in the filename.
-                     If using 'custom' frequency, it is used to trigger file rotation when the string representation changes.
+ - *frequency*:      How often to rotate. Options are '*daily*' for daily rotation, '*date*' based on *date_format*, '*[1-12]h*' to rotate every 1-12 hours, 
+                     '*[1-30]m*' to rotate every 1-30 minutes.                     
+ - *verbose*:        If set, it will use console.log to provide extra information when events happen. Default is false.
+ - *date_format*:    Use 'Y' for full year, 'M' for month, 'D' for day, 'H' for hour, 'm' for minutes, 's' for seconds
+                     If using '*date*' frequency, it is used to trigger file change when the string representation changes.
+                     It will be used to replace %DATE% in the filename. All replacements are numeric only.
  - *size*:           Max size of the file after which it will rotate. It can be combined with frequency or date format.
-                     The size units are 'k', 'm' and 'g'. Units need to directly follow a number e.g. 1g, 100m, 20k.
+                     The size units are 'k', 'm' and 'g'. Units need to directly follow a number e.g. 1g, 100m, 20k.                     
  - *max_logs*        Max number of logs to keep. If not set, it won't remove past logs. It uses its own log audit file
                      to keep track of the log files in a json format. It won't delete any file not contained in it.
-                     It can be a number of files or number of days. If using days, add 'd' as the suffix.
+                     It can be a number of files or number of days. If using days, add 'd' as the suffix. e.g., '10d' for 10 days.
  - *audit_file*      Location to store the log audit file. If not set, it will be stored in the root of the application.
- - *end_stream*      End stream (true) instead of the destroy (default: false). Set value to true if when writing to the
-                     stream in a loop, if the application terminates or log rotates, data pending to be flushed might be lost.       
+ - *end_stream*      End stream (true) instead of the default behaviour of destroy (false). Set value to true if when writing to the
+                     stream in a loop, if the application terminates or log rotates, data pending to be flushed might be lost.
  - *file_options*    An object passed to the stream. This can be used to specify flags, encoding, and mode.
                      See https://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options. Default `{ flags: 'a' }`.             
- - *utc*             Use UTC time for date in filename. Defaults to 'FALSE'
+ - *utc*             Use UTC time for date in filename. Defaults to 'false'
  - *extension*       File extension to be appended to the filename. This is useful when using size restrictions as the rotation
                      adds a count (1,2,3,4,...) at the end of the filename when the required size is met.
- - *watch_log*       Watch the current file being written to and recreate it in case of accidental deletion. Defaults to 'FALSE'
  - *create_symlink*  Create a tailable symlink to the current active log file. Defaults to 'FALSE'
  - *symlink_name*    Name to use when creating the symbolic link. Defaults to 'current.log'
  - *audit_hash_type* Use specified hashing algorithm for audit. Defaults to 'md5'. Use 'sha256' for FIPS compliance.
  
 
 ## Example Usage
+
+### **Typescript**
+```typescript
+import * as FileStreamRotator from 'file-stream-rotator'
+
+var rotatingLogStream = FileStreamRotator.getStream({
+    filename: "/tmp/test-%DATE%", 
+    frequency: "daily", 
+    date_format: "YYYY-MM-DD", 
+    size: "100M",
+    max_logs: "10",
+    audit_file: "/tmp/audit.json",
+    extension: ".log",
+    create_symlink: true,
+    symlink_name: "tail-current.log",
+})
+```
+
+### **Javascript**
 ```javascript
-    // Default date added at the end of the file
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"daily", verbose: false});
- 
-    // Default date added using file pattern
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test-%DATE%.log", frequency:"daily", verbose: false});
- 
-    // Custom date added using file pattern using moment.js formats
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test-%DATE%.log", frequency:"daily", verbose: false, date_format: "YYYY-MM-DD"});
- 
-    // Rotate when the date format as calculated by momentjs is different (e.g monthly)
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test-%DATE%.log", frequency:"custom", verbose: false, date_format: "YYYY-MM"});
- 
-    // Rotate when the date format as calculated by momentjs is different (e.g weekly)
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test-%DATE%.log", frequency:"custom", verbose: false, date_format: "YYYY-ww"});
- 
-    // Rotate when the date format as calculated by momentjs is different (e.g AM/PM)
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test-%DATE%.log", frequency:"custom", verbose: false, date_format: "YYYY-MM-DD-A"});
- 
-    // Rotate on given minutes using the 'm' option i.e. 5m or 30m
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"5m", verbose: false});
-     
-    // Rotate on the hour or any specified number of hours
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"1h", verbose: false});
+// Default date added at the end of the file
+var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"daily", verbose: false});
 
-    // Rotate on the hour or any specified number of hours and keep 10 files
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"1h", verbose: false, max_logs: 10});
+// Default date added using file pattern
+var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test-%DATE%.log", frequency:"daily", verbose: false});
 
-    // Rotate on the hour or any specified number of hours and keep 10 days
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"1h", verbose: false, max_logs: "10d"});
+// Custom date added using file pattern using date format
+var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test-%DATE%.log", frequency:"daily", verbose: false, date_format: "YYYY-MM-DD"});
 
-    // Rotate on the hour or any specified number of hours and keep 10 days and store the audit file in /tmp/log-audit.json
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"1h", verbose: false, max_logs: "10d", audit_file: "/tmp/log-audit.json"});
+// Rotate when the date format is different (e.g monthly) using Y (Year), M (Month) replacements
+var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test-%DATE%.log", frequency:"custom", verbose: false, date_format: "YYYY-MM"});
 
-    // Rotate by file size only without date included in the name. Iteration will be added at the end.
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/logfile", size:"50k", max_logs: "5", audit_file:"/tmp/logaudit.json"});
+// Rotate when the date format is different (e.g AM/PM) using Y (Year), M (Month), D (Day), A (AM/PM) replacements
+var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test-%DATE%.log", frequency:"custom", verbose: false, date_format: "YYYY-MM-DD-A"});
 
-    // Rotate by file size only without date included in the name. Rotation added before the extension.
-    var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/logfile", size:"50k", max_logs: "5", audit_file:"/tmp/logaudit.json". extension: ".log"});
+// Rotate on given minutes using the 'm' option i.e. 5m or 30m
+var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"5m", verbose: false});
+  
+// Rotate on the hour or any specified number of hours
+var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"1h", verbose: false});
+
+// Rotate on the hour or any specified number of hours and keep 10 files
+var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"1h", verbose: false, max_logs: 10});
+
+// Rotate on the hour or any specified number of hours and keep 10 days
+var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"1h", verbose: false, max_logs: "10d"});
+
+// Rotate on the hour or any specified number of hours and keep 10 days and store the audit file in /tmp/log-audit.json
+var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/test.log", frequency:"1h", verbose: false, max_logs: "10d", audit_file: "/tmp/log-audit.json"});
+
+// Rotate by file size only without date included in the name. Iteration will be added at the end.
+var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/logfile", size:"50k", max_logs: "5", audit_file:"/tmp/logaudit.json"});
+
+// Rotate by file size only without date included in the name. Rotation added before the extension.
+var rotatingLogStream = require('file-stream-rotator').getStream({filename:"/tmp/logfile", size:"50k", max_logs: "5", audit_file:"/tmp/logaudit.json", extension: ".log"});
 
 
-    //.....    
-    
-    // Use new stream in express
-    app.use(express.logger({stream: rotatingLogStream, format: "default"}));
-    
-    //.....
+//.....    
+
+// Use new stream in express
+app.use(express.logger({stream: rotatingLogStream, format: "default"}));
+
+//.....
 
 ```
     

@@ -4,11 +4,12 @@ var moment = require('moment');
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"dont-rotate", verbose: true, date_format: "YYYY-MM-DD.HH.mm.ss"});
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"daily", verbose: true, date_format: "YYYYMMDD"});
 // var rotatingLogStream = require('../FileStreamRotator').getStream({filename:"/tmp/testlog-%DATE%.log", frequency:"daily", verbose: true});
-var rotatingLogStream = require('../FileStreamRotator').getStream({
+// var rotatingLogStream = require('../FileStreamRotator').getStream({
+var rotatingLogStream = require('../lib/index').default.getStream({
     filename:"logs/1s/testlog-%DATE%.log", 
     frequency:"custom", 
     verbose: true, 
-    date_format: "YYYY-MM-DD.HH.mm", 
+    date_format: "YYYY-MM-DD.HH.mm.ss", 
     size:"50k",
     max_logs: "5", 
     audit_file:"audit-1s.json",
@@ -55,7 +56,7 @@ var counter = 0;
 var i = setInterval(function(){
     counter++;
     // rotatingLogStream.write(Date() + "\ttesting 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890-testing 1234567890\n")
-    rotatingLogStream.write(Date() + "ニューバランスの100年を超える長い歴史\n")
+    // rotatingLogStream.write(Date() + "ニューバランスの100年を超える長い歴史\n")
     // if(counter == 2000){
     if(counter == 400){
         clearInterval(i);
