@@ -23,10 +23,10 @@ export default class FileStreamRotator extends EventEmitter {
     private auditManager: AuditManager
     // private logWatcher?: FSWatcher
 
-    constructor(options: Partial<FileStreamRotatorOptions>){
+    constructor(options: Partial<FileStreamRotatorOptions>, debug: boolean = false){
         super()
         this.config = this.parseOptions(options)
-        Logger.getInstance(options.verbose, false)
+        Logger.getInstance(options.verbose, debug)
 
         this.auditManager = new AuditManager(this.config.auditSettings ?? DefaultOptions.auditSettings({}), this)
         let lastEntry = this.auditManager.config.files.slice(-1).shift()
@@ -120,9 +120,9 @@ export default class FileStreamRotator extends EventEmitter {
         return config
     }
 
-    rotate() {
+    rotate(force: boolean = false) {
         let oldFile = this.currentFile
-        this.rotator.rotate()
+        this.rotator.rotate(force)
         this.currentFile = this.rotator.getNewFilename()
 
         // oldfile same as new file. do nothing
@@ -149,7 +149,7 @@ export default class FileStreamRotator extends EventEmitter {
 
         this.createNewLog(this.currentFile)
         this.emit('new', this.currentFile)
-        this.emit('rotate', oldFile, this.currentFile)
+        this.emit('rotate', oldFile, this.currentFile, force)
     }
 
     private createNewLog(filename: string) {
@@ -168,7 +168,7 @@ export default class FileStreamRotator extends EventEmitter {
         this.fs = fs.createWriteStream(filename, streamOptions)
 
         // setup dependencies: proxy events, emit events
-        this.bubbleEvents(this.fs)        
+        this.bubbleEvents(this.fs, filename)
 
         // setup symlink
         if (this.config.options?.create_symlink){
@@ -196,11 +196,11 @@ export default class FileStreamRotator extends EventEmitter {
         }        
     }
     
-    private bubbleEvents(emitter: EventEmitter) {
+    private bubbleEvents(emitter: EventEmitter, filename: string) {
         emitter.on('close',() => { this.emit('close') })
         emitter.on('finish',() => { this.emit('finish') })
         emitter.on('error',(err) => { this.emit('error',err) })
-        emitter.on('open',(fd) => { this.emit('open',this.currentFile) })
+        emitter.on('open',(fd) => { this.emit('open',filename) })
     }
 
     private createCurrentSymLink(logfile?: string) {

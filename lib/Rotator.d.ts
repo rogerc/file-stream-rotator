@@ -15,7 +15,7 @@ export default class Rotator {
     private getFilename;
     getNewFilename(): string;
     addBytes(bytes: number): void;
-    rotate(): string;
+    rotate(force?: boolean): string;
     static getDateComponents(date: Date, utc: boolean): DateComponents;
     static createDate(components: DateComponents, utc: boolean): Date;
 }

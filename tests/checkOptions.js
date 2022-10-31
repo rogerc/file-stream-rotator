@@ -7,6 +7,7 @@ exports.__esModule = true;
 var node_assert_1 = __importDefault(require("node:assert"));
 var enums_1 = require("../lib/enums");
 var test;
+//*
 // Default date added at the end of the file
 var rotatingLogStream = require('../lib').getStream({ filename: "/tmp/testlog/1/test.log", frequency: "daily", verbose: false });
 test = rotatingLogStream.test();
@@ -137,3 +138,92 @@ test = rotatingLogStream.test();
 (0, node_assert_1["default"])(test.rotator.getDateString(new Date(2022, 9, 28, 12, 6, 0)) == "202210281200", "".concat(test.rotator.getDateString(new Date(2022, 9, 29, 12, 6, 0)), " != \"202210281200\""));
 (0, node_assert_1["default"])(test.rotator.getDateString(new Date(2022, 9, 28, 12, 36, 0)) == "202210281230", "".concat(test.rotator.getDateString(new Date(2022, 9, 29, 12, 36, 0)), " != \"202210281230\""));
 (0, node_assert_1["default"])(test.rotator.getNewFilename() == "/tmp/testlog/14/test.log." + test.rotator.getDateString(), "".concat(test.rotator.getNewFilename(), " != ").concat("/tmp/testlog/14/test.log." + test.rotator.getDateString()));
+// */
+// Rotate on given minutes using the 'm' option i.e. 5m or 30m
+var rotatingLogStream = require('../lib').getStream({ filename: "/tmp/testlog/15/test.log", frequency: "1m", verbose: false }, true);
+rotatingLogStream.on("rotate", function (oldFile, newFile, forced) {
+    console.log(Date.now(), Date(), "15 stream rotated", oldFile, newFile, "forced", forced);
+});
+rotatingLogStream.on("open", function (fd) {
+    console.log(Date.now(), Date(), "15 stream open", fd);
+});
+rotatingLogStream.on("new", function (fd) {
+    console.log(Date.now(), Date(), "15 stream new", fd);
+});
+test = rotatingLogStream.test();
+(0, node_assert_1["default"])(test.rotator.settings.frequency == enums_1.Frequency.minutes);
+(0, node_assert_1["default"])(test.rotator.settings.format == "YMDHm");
+(0, node_assert_1["default"])(test.rotator.settings.amount == 1);
+(0, node_assert_1["default"])(test.rotator.getDateString(new Date(2022, 9, 28, 12, 2, 59)) == "202210281202", "".concat(test.rotator.getDateString(new Date(2022, 9, 29, 12, 2, 59)), " != \"202210281202\""));
+(0, node_assert_1["default"])(test.rotator.getDateString(new Date(2022, 9, 28, 12, 3, 0)) == "202210281203", "".concat(test.rotator.getDateString(new Date(2022, 9, 29, 12, 3, 0)), " != \"202210281203\""));
+(0, node_assert_1["default"])(test.rotator.getNewFilename() == "/tmp/testlog/15/test.log." + test.rotator.getDateString(), "".concat(test.rotator.getNewFilename(), " != ").concat("/tmp/testlog/15/test.log." + test.rotator.getDateString()));
+var row = 0;
+var interval = setInterval(function () {
+    rotatingLogStream.write("".concat(row, "\n"));
+    row += 1;
+    if (row == 200) {
+        clearInterval(interval);
+    }
+}, 10);
+rotatingLogStream.rotate();
+var test2 = rotatingLogStream.test();
+(0, node_assert_1["default"])(test.rotator.getNewFilename() == test2.rotator.getNewFilename(), "".concat(test.rotator.getNewFilename(), " != ").concat(test2.rotator.getNewFilename()));
+rotatingLogStream.write("this is a test 1");
+test = rotatingLogStream.test();
+// console.log(test.rotator)
+setTimeout(function () {
+    rotatingLogStream.rotate(true);
+    test = rotatingLogStream.test();
+    rotatingLogStream.write("this is a test 12");
+    (0, node_assert_1["default"])(test.rotator.getNewFilename() == "/tmp/testlog/15/test.log." + test.rotator.getDateString() + ".1", "".concat(test.rotator.getNewFilename(), " != ").concat("/tmp/testlog/15/test.log." + test.rotator.getDateString() + ".1"));
+    // console.log(rotatingLogStream.test().rotator)
+    rotatingLogStream.rotate();
+    // console.log(rotatingLogStream.test().rotator)
+}, 1000);
+setTimeout(function () {
+    rotatingLogStream.write("this is a test 123");
+    test = rotatingLogStream.test();
+    // console.log(test.rotator)
+    (0, node_assert_1["default"])(test.rotator.getNewFilename() == "/tmp/testlog/15/test.log." + test.rotator.getDateString(), "".concat(test.rotator.getNewFilename(), " != ").concat("/tmp/testlog/15/test.log." + test.rotator.getDateString()));
+}, 1000 * 60);
+// Force rotation - Rotate on given minutes using the 'm' option i.e. 5m or 30m with max size 1k
+var rotatingLogStream16 = require('../lib').getStream({ filename: "/tmp/testlog/16/test", frequency: "1m", extension: ".log", verbose: false, size: "1k" }, true);
+rotatingLogStream16.on("rotate", function (oldFile, newFile, forced) {
+    console.log(Date.now(), Date(), "16 stream rotated", oldFile, newFile, "forced", forced);
+});
+rotatingLogStream16.on("open", function (fd) {
+    console.log(Date.now(), Date(), "16 stream open", fd);
+});
+rotatingLogStream16.on("new", function (fd) {
+    console.log(Date.now(), Date(), "16 stream new", fd);
+});
+var test16 = rotatingLogStream16.test();
+(0, node_assert_1["default"])(test16.rotator.settings.frequency == enums_1.Frequency.minutes);
+(0, node_assert_1["default"])(test16.rotator.settings.format == "YMDHm");
+(0, node_assert_1["default"])(test16.rotator.settings.amount == 1);
+(0, node_assert_1["default"])(test16.rotator.getDateString(new Date(2022, 9, 28, 12, 2, 59)) == "202210281202", "".concat(test16.rotator.getDateString(new Date(2022, 9, 29, 12, 2, 59)), " != \"202210281202\""));
+(0, node_assert_1["default"])(test16.rotator.getDateString(new Date(2022, 9, 28, 12, 3, 0)) == "202210281203", "".concat(test16.rotator.getDateString(new Date(2022, 9, 29, 12, 3, 0)), " != \"202210281203\""));
+(0, node_assert_1["default"])(test16.rotator.getNewFilename() == "/tmp/testlog/16/test." + test16.rotator.getDateString() + ".0.log", "".concat(test16.rotator.getNewFilename(), " != ").concat("/tmp/testlog/16/test." + test16.rotator.getDateString() + ".0.log"));
+var row16 = 0;
+var interval16 = setInterval(function () {
+    rotatingLogStream16.write("test 16 - row ".concat(row16, "\n"));
+    row16 += 1;
+    if (row16 == 200) {
+        clearInterval(interval16);
+    }
+}, 10);
+rotatingLogStream16.rotate();
+var test16_1 = rotatingLogStream16.test();
+(0, node_assert_1["default"])(test16.rotator.getNewFilename() == test16_1.rotator.getNewFilename(), "".concat(test16.rotator.getNewFilename(), " != ").concat(test16_1.rotator.getNewFilename()));
+rotatingLogStream16.write("this is a test 1");
+test16 = rotatingLogStream16.test();
+// console.log(test.rotator)
+setTimeout(function () {
+    rotatingLogStream16.rotate(true);
+    test16 = rotatingLogStream16.test();
+    rotatingLogStream16.write("this is a test 12");
+    (0, node_assert_1["default"])(test16.rotator.getNewFilename() == "/tmp/testlog/16/test." + test16.rotator.getDateString() + ".2.log", "".concat(test16.rotator.getNewFilename(), " != ").concat("/tmp/testlog/16/test." + test16.rotator.getDateString() + ".2.log"));
+    // console.log(rotatingLogStream16.test().rotator)
+    rotatingLogStream16.rotate();
+    // console.log(rotatingLogStream.test().rotator)
+}, 1000);

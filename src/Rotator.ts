@@ -216,7 +216,7 @@ export default class Rotator {
 
     private getFilename(name: string, extension?: string): string {
         // console.log(name.replace("%DATE%",this.lastDate) + (this.settings.maxSize ? "." + this.fileIndx : "") + (extension ? extension : ""))
-        return name.replace("%DATE%",this.lastDate) + (this.settings.maxSize ? "." + this.fileIndx : "") + (extension ? extension : "")
+        return name.replace("%DATE%",this.lastDate) + (this.settings.maxSize || this.fileIndx > 0 ? "." + this.fileIndx : "") + (extension ? extension : "")
     }
 
     getNewFilename(): string {
@@ -227,9 +227,13 @@ export default class Rotator {
         this.currentSize += bytes
     }
 
-    rotate(): string{
+    rotate(force: boolean = false): string{
         // Logger.debug("ROTATE", this.getNewFilename(), this.fileIndx, this.currentSize, this.settings.maxSize)
-        if (this.shouldRotate()){
+        if (force){
+            this.fileIndx += 1
+            this.currentSize = 0
+            this.lastDate = this.getDateString()
+        } else if (this.shouldRotate()){
             if (this.hasMaxSizeReached()){
                 this.fileIndx += 1
             } else {

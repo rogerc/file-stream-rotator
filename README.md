@@ -15,6 +15,7 @@ npm install file-stream-rotator
 ```
 
 **IMPORTANT NOTE**
+
 Since version 1, *moment.js* is not used anymore. The external dependencies have been removed. The date substitutions are done internally and only using numerical values for year, month, day, hour, minute, second. AM/PM is the only text replacement.
 
 Frequency options have changed too.
@@ -146,6 +147,9 @@ You can also limit the size of each file by adding the size option using "k", "m
     rotatingLogStream.on('rotate',function(oldFile,newFile){
         // do something with old file like compression or delete older than X days.
     })
+
+    // Manually rotate to close current file for archiving
+    rotatingLogStream.rotate(true)
 ```
 
 ## NPM Maintainers

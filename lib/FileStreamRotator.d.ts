@@ -10,9 +10,9 @@ export default class FileStreamRotator extends EventEmitter {
     private rotator;
     private currentFile?;
     private auditManager;
-    constructor(options: Partial<FileStreamRotatorOptions>);
+    constructor(options: Partial<FileStreamRotatorOptions>, debug?: boolean);
     private parseOptions;
-    rotate(): void;
+    rotate(force?: boolean): void;
     private createNewLog;
     write(str: string, encoding?: BufferEncoding): void;
     end(str: string): void;
