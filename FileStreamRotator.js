@@ -257,7 +257,7 @@ function removeFile(file){
         try{
             fs.unlinkSync(file.name);
         }catch(e){
-            console.error(new Date(), "[FileStreamRotator] Could not remove old log file: ", file.name);
+            console.error(new Date(), "[FileStreamRotator] Could not remove old log file: ", file.name, "Error:", e);
         }
     }
 }
