@@ -263,7 +263,7 @@ function removeFile(file){
 }
 
 // Public Remove File
-FileStreamRotator.removeFile(file) = removeFile(file)
+FileStreamRotator.removeFile = (file) => removeFile(file)
 
 /**
  * Write audit json object to disk
