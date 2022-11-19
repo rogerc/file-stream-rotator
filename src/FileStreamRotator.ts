@@ -1,4 +1,4 @@
-import { EventEmitter, Stream } from "node:stream";
+import { EventEmitter } from "node:stream";
 import * as fs from "fs";
 import path = require('path');
 
@@ -9,7 +9,6 @@ import DefaultOptions from "./DefaultOptions";
 import Rotator from "./Rotator";
 import AuditManager from "./AuditManager"
 import { Logger, makeDirectory } from "./helper";
-import { FSWatcher } from "node:fs";
 
 export default class FileStreamRotator extends EventEmitter {
     static getStream(options: Partial<FileStreamRotatorOptions>): FileStreamRotator {

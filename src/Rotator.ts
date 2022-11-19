@@ -1,5 +1,4 @@
 import * as fs from "fs"
-import { toUSVString } from "util";
 import { Frequency } from "./enums";
 import { Logger } from "./helper";
 import { AuditEntry, DateComponents, RotationSettings } from "./types";

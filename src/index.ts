@@ -1,4 +1,4 @@
-import { FileOptions, FileStreamRotatorOptions } from "./types"
+import { FileStreamRotatorOptions } from "./types"
 import FileStreamRotator from "./FileStreamRotator"
 
 
