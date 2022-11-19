@@ -1,5 +1,3 @@
-var os = require('os');
-
 require('crypto').randomBytes(1048, function(err, buffer) {
     var token = buffer.toString('hex');
     var logStream = require('../FileStreamRotator').getStream({
