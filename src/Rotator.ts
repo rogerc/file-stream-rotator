@@ -183,6 +183,10 @@ export default class Rotator {
     getDateString(date?: Date): string {
         let _date: Date = date || new Date()
 
+        if (typeof this.settings.getDateString === 'function') {
+          return this.settings.getDateString(_date);
+        }
+
         let components: DateComponents = Rotator.getDateComponents(_date, this.settings.utc)
 
         let format = this.settings.format

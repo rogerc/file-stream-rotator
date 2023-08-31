@@ -68,7 +68,7 @@ export default class FileStreamRotator extends EventEmitter {
         }
         config.auditSettings = auditSettings
 
-        config.rotationSettings = DefaultOptions.rotationSettings({filename: options.filename, extension: options.extension})
+        config.rotationSettings = DefaultOptions.rotationSettings({ filename: options.filename, extension: options.extension })
         if (options.date_format && !options.frequency){
             config.rotationSettings.frequency = Frequency.date
         } else {
@@ -78,6 +78,9 @@ export default class FileStreamRotator extends EventEmitter {
         if (options.date_format) {
             config.rotationSettings.format = options.date_format
         } 
+        if (typeof options.getDateString === 'function') {
+          config.rotationSettings.getDateString = options.getDateString
+        }
         config.rotationSettings.utc = options.utc ?? false
         switch(options.frequency){
             case "daily":
