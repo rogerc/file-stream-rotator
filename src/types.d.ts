@@ -21,6 +21,7 @@ export type RotationSettings = {
     format?: string
     utc: boolean
     extension?: string
+    getDateString(date?: Date): string
 }
 
 export type FileOptions = {
@@ -89,6 +90,9 @@ export type FileStreamRotatorOptions = {
     symlink_name?: string
     /** Use specified hashing algorithm for audit. Defaults to 'md5'. Use 'sha256' for FIPS compliance. */
     audit_hash_type?: "md5" | "sha256"
+
+    /** use this to define your filename with date */
+    getDateString?: (date?: Date) => string
 }
 
 export type FileStreamRotatorConfig = {
