@@ -5,6 +5,7 @@ import { Logger, makeDirectory } from "./helper";
 import { AuditConfigFile, AuditEntry, AuditSettings } from "./types";
 import * as crypto from "crypto"
 import { EventEmitter } from "stream";
+import * as sleep from "sleep-promise";
 
 export default class AuditManager {
 
@@ -59,38 +60,44 @@ export default class AuditManager {
             return
         }
 
-        var time = Date.now();
-        this.config.files.push({
-            date: time,
-            name: name,
-            hash: crypto.createHash(this.config.hashType).update(name + "LOG_FILE" + time).digest("hex")
-        });
-        Logger.debug(`added file ${name} to log`)
+        // add a random sleep to avoid concurrent writes to the same file
+        sleep(Math.random() * 1000).then(() => {
+            // read audit file again before updating it
+            this.loadLog();
 
-        if (this.config.keepSettings && this.config.keepSettings.amount){
-            if(this.config.keepSettings.type == KeepLogFiles.days){
-                let date = Date.now() - 86400*this.config.keepSettings.amount*1000
-                let files = this.config.files.filter((logEntry) => {
-                    if (logEntry.date >= date) {
-                        return true
-                    }
-                    this.removeLog(logEntry)                    
-                })
-                
-                this.config.files = files
-            } else if (this.config.files.length > this.config.keepSettings.amount){
-                var filesToKeep = this.config.files.splice(-this.config.keepSettings.amount);
-                if(this.config.files.length > 0){
-                    this.config.files.filter((logEntry) => {
-                        this.removeLog(logEntry);
-                        return false;
+            var time = Date.now();
+            this.config.files.push({
+                date: time,
+                name: name,
+                hash: crypto.createHash(this.config.hashType).update(name + "LOG_FILE" + time).digest("hex")
+            });
+            Logger.debug(`added file ${name} to log`)
+
+            if (this.config.keepSettings && this.config.keepSettings.amount){
+                if(this.config.keepSettings.type == KeepLogFiles.days){
+                    let date = Date.now() - 86400*this.config.keepSettings.amount*1000
+                    let files = this.config.files.filter((logEntry) => {
+                        if (logEntry.date >= date) {
+                            return true
+                        }
+                        this.removeLog(logEntry)                    
                     })
+                    
+                    this.config.files = files
+                } else if (this.config.files.length > this.config.keepSettings.amount){
+                    var filesToKeep = this.config.files.splice(-this.config.keepSettings.amount);
+                    if(this.config.files.length > 0){
+                        this.config.files.filter((logEntry) => {
+                            this.removeLog(logEntry);
+                            return false;
+                        })
+                    }
+                    this.config.files = filesToKeep
                 }
-                this.config.files = filesToKeep
             }
-        }
 
-        this.writeLog()
+            this.writeLog()
+        });
     }
 
     private removeLog(logEntry: AuditEntry){
