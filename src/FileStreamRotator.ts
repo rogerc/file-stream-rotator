@@ -167,6 +167,8 @@ export default class FileStreamRotator extends EventEmitter {
         }
         this.fs = fs.createWriteStream(filename, streamOptions)
 
+        this.emit('new', this.currentFile)
+        
         // setup dependencies: proxy events, emit events
         this.bubbleEvents(this.fs, filename)
 
