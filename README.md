@@ -160,6 +160,7 @@ You can also limit the size of each file by adding the size option using "k", "m
 The npm module for this library will be maintained by:
 
 * [Roger C](http://github.com/rogerc)
+* [Ingo Fischer](https://github.com/Apollon77)
 
 ## Contributors
 
