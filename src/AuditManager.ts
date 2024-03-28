@@ -101,6 +101,9 @@ export default class AuditManager {
                     fs.unlinkSync(logEntry.name);
                     this.emitter.emit("logRemoved", logEntry.name)
                 }
+                else {
+                    this.emitter.emit("logRemoved", logEntry.name)
+                }
             }catch(e){
                 Logger.verbose("Could not remove old log file: ", logEntry.name);
             }
