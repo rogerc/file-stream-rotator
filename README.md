@@ -31,7 +31,7 @@ Frequency options have changed too.
                      It will be used to replace %DATE% in the filename. All replacements are numeric only.
  - *size*:           Max size of the file after which it will rotate. It can be combined with frequency or date format.
                      The size units are 'k', 'm' and 'g'. Units need to directly follow a number e.g. 1g, 100m, 20k.                     
- - *max_logs*        Max number of logs to keep. If not set, it won't remove past logs. It uses its own log audit file
+ - *max_logs*        Max number of logs to keep. The default is 10 files. It uses its own log audit file
                      to keep track of the log files in a json format. It won't delete any file not contained in it.
                      It can be a number of files or number of days. If using days, add 'd' as the suffix. e.g., '10d' for 10 days.
  - *audit_file*      Location to store the log audit file. If not set, it will be stored in the root of the application.
