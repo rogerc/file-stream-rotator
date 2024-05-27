@@ -1,4 +1,3 @@
-import { EventEmitter, Stream } from "node:stream";
 import * as fs from "fs";
 import path = require('path');
 
@@ -9,7 +8,7 @@ import DefaultOptions from "./DefaultOptions";
 import Rotator from "./Rotator";
 import AuditManager from "./AuditManager"
 import { Logger, makeDirectory } from "./helper";
-import { FSWatcher } from "node:fs";
+import EventEmitter = require("events");
 
 export default class FileStreamRotator extends EventEmitter {
     static getStream(options: Partial<FileStreamRotatorOptions>): FileStreamRotator {
@@ -31,17 +30,7 @@ export default class FileStreamRotator extends EventEmitter {
         this.auditManager = new AuditManager(this.config.auditSettings ?? DefaultOptions.auditSettings({}), this)
         let lastEntry = this.auditManager.config.files.slice(-1).shift()
         this.rotator = new Rotator((this.config.rotationSettings ?? DefaultOptions.rotationSettings({})), lastEntry)
-
-        this.rotate()
-
-        // this does not seem to work anymore.
-        // this.on("open", (filename: string) => {
-        //     // monitor for file deletion
-        //     if (this.config.options?.watch_log) {
-        //         console.log(">>> setting up watcher", filename)
-        //         this.logWatcher = this.createLogWatcher(filename, this.processWatcherEvents.bind(this))
-        //     }
-        // })
+        this.rotate();
     }
 
     private parseOptions(options: Partial<FileStreamRotatorOptions>): FileStreamRotatorConfig {
@@ -114,10 +103,9 @@ export default class FileStreamRotator extends EventEmitter {
                     break
             }
         }
-
-        this.rotator = new Rotator(config.rotationSettings)
-        let oldFile = this.rotator.getNewFilename()
-        return config
+        config.rotationSettings.keepSettings = auditSettings.keepSettings;
+        this.rotator = new Rotator(config.rotationSettings);
+        return config;
     }
 
     rotate(force: boolean = false) {
@@ -229,37 +217,6 @@ export default class FileStreamRotator extends EventEmitter {
         }
     }
 
-    /*
-    // does not seem to work anymore
-    private createLogWatcher(logfile: string, processEvent: ((event: fs.WatchEventType, file: string) => void)): FSWatcher | undefined{
-        if(!logfile) return
-        try {
-            if (!fs.existsSync(logfile)) {
-                Logger.verbose("Watcher error: file does not exist" + logfile);
-                return
-            }
-            let stats = fs.lstatSync(logfile)
-            return fs.watch(logfile, (event, filename) => {
-                processEvent(event, filename)
-            })
-        }catch(err){
-            Logger.verbose("Could not add watcher for " + logfile, err);
-            return
-        }   
-    }
-
-    private processWatcherEvents(event: fs.WatchEventType, filename: string) {
-        if (!this.currentFile) { return }
-        if (filename == this.currentFile){
-            if (event == "rename") {
-                if (this.logWatcher) {
-                    this.logWatcher.close()
-                }
-                this.createNewLog(this.currentFile)
-            }
-        }
-    }
-    */
 
     test(): {config: FileStreamRotatorConfig, rotator: Rotator} {
         return {config: this.config, rotator: this.rotator}

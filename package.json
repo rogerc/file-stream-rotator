@@ -1,5 +1,5 @@
 {
-    "name": "file-stream-rotator",
+    "name": "@gdnet/file-stream-rotator",
     "version": "1.0.0",
     "description": "Automated stream rotation useful for log files",
     "main": "lib/index.js",
@@ -26,6 +26,9 @@
         "logrotate"
     ],
     "author": "Roger Castells",
+    "contributors": [
+        "Gilles Dufour - dufour.gilles@gmail.com"
+    ],
     "license": "MIT",
     "dependencies": {},
     "devDependencies": {
