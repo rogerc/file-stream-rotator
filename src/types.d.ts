@@ -21,6 +21,7 @@ export type RotationSettings = {
     format?: string
     utc: boolean
     extension?: string
+    keepSettings?: KeepSettings
 }
 
 export type FileOptions = {

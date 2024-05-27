@@ -14,11 +14,6 @@ export default class Rotator {
 
     constructor(settings: RotationSettings, lastEntry?: AuditEntry){
         this.settings = settings
-        // if (!this.settings.format) {
-        //     this.settings.frequency = Frequency.none
-        //     Logger.log("[FileStreamRotator] Changing type to none as date format is missing");
-        //     return
-        // }
         switch(this.settings.frequency) {
             case Frequency.hours:
                 if (!(this.settings.amount && this.settings.amount < 13)) {
@@ -29,10 +24,8 @@ export default class Rotator {
 
 
                 if (!this.isFormatValidForHour()) {
-                    // Logger.log(`[FileStreamRotator] Changing type to none as date format does not change every ${this.settings.amount} hours`);
                     Logger.log("Date format not suitable for X hours rotation. Changing date format to 'YMDHm'");
                     this.settings.format = "YMDHm"
-                    // this.settings.frequency = Frequency.none
                 }
                 break;
             case Frequency.minutes:
@@ -45,16 +38,12 @@ export default class Rotator {
                 if (!this.isFormatValidForMinutes()) {
                     this.settings.format = "YMDHm"
                     Logger.log("Date format not suitable for X minutes rotation. Changing date format to 'YMDHm'");
-                    // Logger.log(`[FileStreamRotator] Changing type to none as date format does not change every ${this.settings.amount} minutes`);                    
-                    // this.settings.frequency = Frequency.none
                 }
                 break;
             case Frequency.daily:
                 if (!this.isFormatValidForDaily()) {
                     this.settings.format = "YMD"
                     Logger.log("Date format not suitable for daily rotation. Changing date format to 'YMD'");
-                    // Logger.log('[FileStreamRotator] Changing type to custom as date format changes more often than once a day or not every day');
-                    // this.settings.frequency = Frequency.date
                 }
                 break;
         }
@@ -63,25 +52,6 @@ export default class Rotator {
             this.settings.filename += ".%DATE%"
             Logger.log(`Appending date to the end of the filename`);
         }
-
-        // if (this.settings.maxSize && lastEntry){
-        //     let date = new Date(lastEntry.date)
-        //     let extension = this.settings.extension ?? ""
-        //     Logger.debug(this.getDateString(date) == this.getDateString(new Date()), this.getDateString(date), this.getDateString(new Date()))
-        //     if (this.getDateString(date) == this.getDateString(new Date())){                    
-        //         let indx = lastEntry.name.match(RegExp("(\\d+)" + extension.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
-        //         if (indx) {
-        //             this.fileIndx = Number(indx)
-        //         }
-        //         Logger.debug("index found", indx, RegExp("(\\d+)" + extension.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), lastEntry)
-        //         var lastEntryFileStats = fs.statSync(lastEntry.name);
-        //         if (lastEntryFileStats.size < this.settings.maxSize) {
-        //             this.currentSize = lastEntryFileStats.size
-        //         } else {
-        //             this.fileIndx += 1
-        //         }
-        //     }
-        // }
 
         this.lastDate = this.getDateString()
 
@@ -94,7 +64,6 @@ export default class Rotator {
                 if (indx) {
                     this.fileIndx = Number(indx[1])
                 }
-                // Logger.debug("index found", indx, RegExp("(\\d+)" + extension.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), lastEntry)
                 var fileSize = this.getSizeForFile(this.getNewFilename())
                 if (fileSize){
                     this.currentSize = fileSize
@@ -109,8 +78,6 @@ export default class Rotator {
                 Logger.debug("CURRENT FILE:", this.getNewFilename(), this.currentSize)
             }
         }
-
-
     }
 
     private getSizeForFile(file: string): number | undefined {
@@ -124,12 +91,15 @@ export default class Rotator {
         } catch(error: any){
             return undefined
         }
-
         return undefined
     }
 
     hasMaxSizeReached(): boolean {
         return this.settings.maxSize ? this.currentSize >  this.settings.maxSize : false
+    }
+
+    hasMaxFilesReached(): boolean {
+        return this.settings.keepSettings?.amount != null && this.fileIndx >= this.settings.keepSettings.amount;
     }
 
     shouldRotate(): boolean {
@@ -144,14 +114,12 @@ export default class Rotator {
             case Frequency.daily:
             default:
                 let newDate = this.getDateString()
-                // console.log(">>>", this.lastDate != newDate, this.lastDate, newDate, rotateBySize, this.currentSize)
                 if (this.lastDate != newDate) {
                     return true
                 } else {
                     return rotateBySize
                 }
         }
-        // return false
     }
 
     private isFormatValidForDaily(): boolean {
@@ -227,23 +195,24 @@ export default class Rotator {
         this.currentSize += bytes
     }
 
-    rotate(force: boolean = false): string{
-        // Logger.debug("ROTATE", this.getNewFilename(), this.fileIndx, this.currentSize, this.settings.maxSize)
+    rotate(force: boolean = false): void{
         if (force){
             this.fileIndx += 1
-            this.currentSize = 0
-            this.lastDate = this.getDateString()
         } else if (this.shouldRotate()){
             if (this.hasMaxSizeReached()){
-                this.fileIndx += 1
+                this.fileIndx += 1;
             } else {
-                this.fileIndx = 0
-            }
-            this.currentSize = 0
-            this.lastDate = this.getDateString()   
+                this.fileIndx = 0;
+            } 
+        } else {
+            return;
         }
-        // Logger.debug("ROTATE", this.getNewFilename(), this.fileIndx, this.currentSize, this.settings.maxSize)
-        return this.getNewFilename()
+        if (this.hasMaxFilesReached()) {
+            this.fileIndx = 0;
+        }
+        this.currentSize = 0
+        this.lastDate = this.getDateString()
+        return;
     }
 
     static getDateComponents(date: Date, utc: boolean): DateComponents {
